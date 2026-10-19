@@ -1,6 +1,6 @@
-package com.onehostel.security;
+package com.onehostel.common.security;
 
-import com.onehostel.constants.CommonEnumHelper.Role;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
 
 public record AuthenticatedUser(String id, String email, Role role, String organizationId, String hostelId,
         String bedId) {

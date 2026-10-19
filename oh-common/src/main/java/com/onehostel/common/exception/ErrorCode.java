@@ -1,4 +1,4 @@
-package com.onehostel.exception;
+package com.onehostel.common.exception;
 
 import java.text.MessageFormat;
 

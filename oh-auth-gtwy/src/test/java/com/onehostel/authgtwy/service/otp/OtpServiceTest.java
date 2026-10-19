@@ -1,4 +1,4 @@
-package com.onehostel.service.otp;
+package com.onehostel.authgtwy.service.otp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,15 +24,15 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.mongodb.client.result.UpdateResult;
-import com.onehostel.constants.CommonEnumHelper.OtpChannel;
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.dto.auth.OtpSendRequest;
-import com.onehostel.exception.ErrorCode;
-import com.onehostel.exception.OneHostelException;
-import com.onehostel.model.OtpChallenge;
-import com.onehostel.model.User;
-import com.onehostel.service.LoginIdentifier;
-import com.onehostel.service.LoginUserFinder;
+import com.onehostel.authgtwy.dto.OtpSendRequest;
+import com.onehostel.authgtwy.model.OtpChallenge;
+import com.onehostel.authgtwy.model.User;
+import com.onehostel.authgtwy.service.LoginIdentifier;
+import com.onehostel.authgtwy.service.LoginUserFinder;
+import com.onehostel.common.constants.CommonEnumHelper.OtpChannel;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.exception.ErrorCode;
+import com.onehostel.common.exception.OneHostelException;
 
 class OtpServiceTest {
 

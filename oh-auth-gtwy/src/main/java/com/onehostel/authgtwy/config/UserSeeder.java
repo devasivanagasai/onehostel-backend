@@ -1,4 +1,4 @@
-package com.onehostel.config;
+package com.onehostel.authgtwy.config;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -12,11 +12,11 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.constants.GlobalConstants;
-import com.onehostel.model.User;
-import com.onehostel.repository.UserRepository;
-import com.onehostel.service.AuthService;
+import com.onehostel.authgtwy.model.User;
+import com.onehostel.authgtwy.repository.UserRepository;
+import com.onehostel.authgtwy.service.AuthService;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.constants.GlobalConstants;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,9 +41,6 @@ public class UserSeeder implements ApplicationRunner {
     /** Dev-only demo passwords, publicly known. */
     static final String DEMO_OWNER_PASSWORD = "Owner@OneHostel2026";
     static final String DEMO_TENANT_PASSWORD = "Tenant@OneHostel2026";
-
-    /** The owner's property group; the tenant lives in it, so the tenant can see the owner's hostels. */
-    static final String DEMO_ORGANIZATION_ID = "org-sunrise-hostels";
 
     private record Seed(String name, String email, String username, String phoneNumber, String password,
             String passcode, Role role, String organizationId, String roomNumber, String bedId) {
@@ -73,9 +70,9 @@ public class UserSeeder implements ApplicationRunner {
         }
         if (bootstrap.demoUsers()) {
             createOrComplete(new Seed("Rajesh Kumar", "rajesh.kumar@onehostel.com", null, "9848012345",
-                    DEMO_OWNER_PASSWORD, null, Role.HOSTEL_OWNER, DEMO_ORGANIZATION_ID, null, null));
+                    DEMO_OWNER_PASSWORD, null, Role.HOSTEL_OWNER, GlobalConstants.DEMO_ORGANIZATION_ID, null, null));
             createOrComplete(new Seed("Priya Sharma", "priya.sharma@onehostel.com", null, "9701234567",
-                    DEMO_TENANT_PASSWORD, null, Role.HOSTEL_TENANT, DEMO_ORGANIZATION_ID, "101",
+                    DEMO_TENANT_PASSWORD, null, Role.HOSTEL_TENANT, GlobalConstants.DEMO_ORGANIZATION_ID, "101",
                     "ROOM-101-BED-A"));
         }
     }

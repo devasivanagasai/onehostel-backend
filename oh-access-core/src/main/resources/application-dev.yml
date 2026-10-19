@@ -1,0 +1,17 @@
+# Local development defaults; override any of them with environment variables.
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017}
+
+app:
+  gateway:
+    # Publicly known dev-only secret; must match oh-auth-gtwy's dev default.
+    signing-secret: ${GATEWAY_SIGNING_SECRET:onehostel-dev-only-gateway-signing-secret-do-not-use-in-prod}
+  bootstrap:
+    # Creates "Sunrise Hostels" (org-sunrise-hostels), the demo owner's and tenant's organization.
+    demo-organization: ${SEED_DEMO_ORGANIZATION:true}
+
+logging:
+  level:
+    com.onehostel: DEBUG

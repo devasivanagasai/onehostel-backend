@@ -1,8 +1,8 @@
-package com.onehostel.service;
+package com.onehostel.authgtwy.service;
 
 import java.util.Locale;
 
-import com.onehostel.constants.GlobalConstants;
+import com.onehostel.common.constants.GlobalConstants;
 
 /** A login identifier, normalized: emails and usernames lower-cased, phones as 10 digits. */
 public record LoginIdentifier(Kind kind, String value) {

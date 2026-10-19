@@ -14,3 +14,7 @@ app:
     user-migration: false
   rate-limit:
     auth-requests-per-minute: 10000
+  gateway:
+    # Nothing listens on port 1: routed requests fail fast with 503, never reaching a real service.
+    access-core-uri: http://127.0.0.1:1
+    seed-public-endpoints: false

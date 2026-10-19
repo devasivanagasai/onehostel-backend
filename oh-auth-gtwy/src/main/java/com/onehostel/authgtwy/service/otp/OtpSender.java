@@ -1,6 +1,6 @@
-package com.onehostel.service.otp;
+package com.onehostel.authgtwy.service.otp;
 
-import com.onehostel.constants.CommonEnumHelper.OtpChannel;
+import com.onehostel.common.constants.CommonEnumHelper.OtpChannel;
 
 /**
  * Delivers a one-time code. Exactly one implementation must be a bean: LoggingOtpSender in dev;

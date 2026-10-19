@@ -1,11 +1,10 @@
-package com.onehostel.repository;
+package com.onehostel.common.search;
 
 import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.onehostel.constants.CommonEnumHelper.EntityType;
-import com.onehostel.model.HostelCommonSearch;
+import com.onehostel.common.constants.CommonEnumHelper.EntityType;
 
 public interface HostelCommonSearchRepository extends MongoRepository<HostelCommonSearch, String> {
 

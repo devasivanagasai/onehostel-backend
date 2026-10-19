@@ -1,12 +1,10 @@
-package com.onehostel.service.search;
+package com.onehostel.common.search;
 
 import java.time.Instant;
 
 import org.springframework.stereotype.Service;
 
-import com.onehostel.constants.CommonEnumHelper.EntityType;
-import com.onehostel.model.HostelCommonSearch;
-import com.onehostel.repository.HostelCommonSearchRepository;
+import com.onehostel.common.constants.CommonEnumHelper.EntityType;
 
 import lombok.RequiredArgsConstructor;
 

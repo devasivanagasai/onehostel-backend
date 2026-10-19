@@ -1,9 +1,9 @@
-package com.onehostel.service.otp;
+package com.onehostel.authgtwy.service.otp;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import com.onehostel.constants.CommonEnumHelper.OtpChannel;
+import com.onehostel.common.constants.CommonEnumHelper.OtpChannel;
 
 import lombok.extern.slf4j.Slf4j;
 

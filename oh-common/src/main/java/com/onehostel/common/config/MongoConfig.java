@@ -1,4 +1,4 @@
-package com.onehostel.config;
+package com.onehostel.common.config;
 
 import java.util.Optional;
 
@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.onehostel.security.AuthenticatedUser;
+import com.onehostel.common.security.AuthenticatedUser;
 
 /**
  * Fills {@code @CreatedDate} / {@code @LastModifiedDate} fields on save, and

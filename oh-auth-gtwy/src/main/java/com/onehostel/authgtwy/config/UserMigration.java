@@ -1,4 +1,4 @@
-package com.onehostel.config;
+package com.onehostel.authgtwy.config;
 
 import java.util.Map;
 
@@ -12,11 +12,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
-import com.onehostel.constants.CollectionNames;
-import com.onehostel.constants.CommonEnumHelper.UserStatus;
-import com.onehostel.repository.UserRepository;
-import com.onehostel.service.search.SearchMirrorService;
-import com.onehostel.service.search.UserSearchMapper;
+import com.onehostel.authgtwy.repository.UserRepository;
+import com.onehostel.authgtwy.service.search.UserSearchMapper;
+import com.onehostel.common.constants.CollectionNames;
+import com.onehostel.common.constants.CommonEnumHelper.UserStatus;
+import com.onehostel.common.search.SearchMirrorService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

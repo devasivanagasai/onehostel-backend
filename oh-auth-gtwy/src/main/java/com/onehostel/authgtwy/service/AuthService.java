@@ -1,4 +1,4 @@
-package com.onehostel.service;
+package com.onehostel.authgtwy.service;
 
 import java.time.Instant;
 import java.util.Locale;
@@ -6,18 +6,18 @@ import java.util.Locale;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.onehostel.constants.CommonEnumHelper.AuthMode;
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.constants.GlobalConstants;
-import com.onehostel.dto.auth.LoginRequest;
-import com.onehostel.dto.auth.LoginResponse;
-import com.onehostel.dto.auth.UserProfile;
-import com.onehostel.exception.ErrorCode;
-import com.onehostel.model.User;
-import com.onehostel.repository.UserRepository;
-import com.onehostel.security.AuthenticatedUser;
-import com.onehostel.security.JwtService;
-import com.onehostel.service.otp.OtpService;
+import com.onehostel.authgtwy.dto.LoginRequest;
+import com.onehostel.authgtwy.dto.LoginResponse;
+import com.onehostel.authgtwy.dto.UserProfile;
+import com.onehostel.authgtwy.model.User;
+import com.onehostel.authgtwy.repository.UserRepository;
+import com.onehostel.authgtwy.security.JwtService;
+import com.onehostel.authgtwy.service.otp.OtpService;
+import com.onehostel.common.constants.CommonEnumHelper.AuthMode;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.constants.GlobalConstants;
+import com.onehostel.common.exception.ErrorCode;
+import com.onehostel.common.security.AuthenticatedUser;
 
 import lombok.extern.slf4j.Slf4j;
 

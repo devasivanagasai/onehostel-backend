@@ -1,4 +1,4 @@
-package com.onehostel.service;
+package com.onehostel.accesscore.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,16 +17,16 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.constants.CommonEnumHelper.Status;
-import com.onehostel.dto.helper.CommonRequestObject;
-import com.onehostel.dto.helper.ListFilter;
-import com.onehostel.dto.hostel.HostelRequest;
-import com.onehostel.dto.hostel.HostelView;
-import com.onehostel.exception.ErrorCode;
-import com.onehostel.exception.OneHostelException;
-import com.onehostel.model.Hostel;
-import com.onehostel.security.AuthenticatedUser;
+import com.onehostel.accesscore.dto.hostel.HostelRequest;
+import com.onehostel.accesscore.dto.hostel.HostelView;
+import com.onehostel.accesscore.model.Hostel;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.constants.CommonEnumHelper.Status;
+import com.onehostel.common.dto.CommonRequestObject;
+import com.onehostel.common.dto.ListFilter;
+import com.onehostel.common.exception.ErrorCode;
+import com.onehostel.common.exception.OneHostelException;
+import com.onehostel.common.security.AuthenticatedUser;
 
 /** Tenancy and write rules of HostelAbstractService, exercised through HostelService. */
 class HostelServiceTest {

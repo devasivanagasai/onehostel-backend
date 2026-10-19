@@ -1,8 +1,8 @@
-package com.onehostel.dto.auth;
+package com.onehostel.authgtwy.dto;
 
-import com.onehostel.constants.CommonEnumHelper.AuthMode;
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.constants.GlobalConstants;
+import com.onehostel.common.constants.CommonEnumHelper.AuthMode;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.constants.GlobalConstants;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

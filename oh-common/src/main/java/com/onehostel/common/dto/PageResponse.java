@@ -1,4 +1,4 @@
-package com.onehostel.dto.helper;
+package com.onehostel.common.dto;
 
 import java.util.List;
 

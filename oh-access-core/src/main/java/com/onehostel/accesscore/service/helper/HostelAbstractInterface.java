@@ -1,11 +1,11 @@
-package com.onehostel.service.helper;
+package com.onehostel.accesscore.service.helper;
 
 import java.util.List;
 import java.util.Set;
 
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.dto.helper.HostelAbstractDto;
-import com.onehostel.model.helper.HostelAbstractDocument;
+import com.onehostel.accesscore.dto.helper.HostelAbstractDto;
+import com.onehostel.accesscore.model.helper.HostelAbstractDocument;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
 
 /**
  * The contract every feature service fills in; HostelAbstractService supplies CRUD, tenancy,

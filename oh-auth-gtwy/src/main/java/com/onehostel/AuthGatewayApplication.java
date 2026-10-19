@@ -7,9 +7,9 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @ConfigurationPropertiesScan
-public class OneHostelApplication {
+public class AuthGatewayApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(OneHostelApplication.class, args);
+        SpringApplication.run(AuthGatewayApplication.class, args);
     }
 }

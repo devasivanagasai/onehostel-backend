@@ -1,30 +1,60 @@
 # OneHostel-Backend
 
-Spring Boot 3.5.9 · Java 21 · MongoDB · Spring Security + JWT · Gradle (Kotlin DSL).
+Spring Boot 3.5.9 · Spring Cloud Gateway (Server MVC) · Java 21 · MongoDB · Spring Security + JWT · Gradle (Kotlin DSL).
 REST API for the OneHostel Angular app.
+
+## Architecture
+
+```
+Angular (:4200) ──▶ oh-auth-gtwy (:8080, the only public entry) ──▶ oh-access-core (:8082, loopback only)
+                     gateway + authentication                        business: organizations, hostels, ...
+                     database onehostel_auth                         database onehostel_core
+```
+
+| Module | What it is |
+|---|---|
+| `oh-common` | Shared library: request/response envelopes, `ErrorCode`, constants and enums, security helpers, search mirror |
+| `oh-auth-gtwy` | Login, OTP, tokens and users (`/api/v1/auth/**`), plus the gateway that checks and routes every other request |
+| `oh-access-core` | Business services. Accepts only requests signed by the gateway |
+
+What the gateway does to every request, in order (the browser only ever talks to it, so the frontend needs no change):
+
+1. **Correlation id:** reuses `X-Correlation-Id` or creates one, and passes it downstream.
+2. **CORS**, and the per-IP **rate limit** on the public auth endpoints.
+3. **Public endpoint?** If the path is on the permit-all list, it goes through without a token. The list is DB-driven (collection `C0011`): built-in entries are seeded at startup, and `POST /api/v1/gateway/public-endpoints/refresh` (super admin) reloads it without a restart.
+4. **Token check:** otherwise the `Bearer` token must be valid and unexpired → else `401`.
+5. **Account check:** the account must still be active and unlocked, read through a 60-second Caffeine cache → else `401`.
+6. **Privilege check:** the endpoint must be in `EndpointPrivilege` (first match wins), and the caller's role must hold the permission it maps to → else `403`. Endpoints missing from the map are refused.
+7. **Route:** `/api/v1/auth/**` and `/api/v1/gateway/**` are handled by the gateway itself. Everything else under `/api/v1` is forwarded to `oh-access-core`, with the caller as `X-User-Id`, `X-User-Email`, `X-User-Role`, `Organization-Id`, `X-Hostel-Id` and `X-Bed-Id`, plus an HMAC signature (`X-Gateway-Signature`, `X-Gateway-Timestamp`).
+
+Before forwarding, the gateway strips any identity headers the client sent, plus `Authorization` and cookies, so the refresh token never leaves it. `oh-access-core` accepts a request only with a valid signature no older than 60 s, so a request that didn't come through the gateway gets `401`. If `oh-access-core` is down, the gateway answers `503 UPSTREAM_UNAVAILABLE` in the standard envelope.
 
 ## Prerequisites
 
 - JDK 21
-- MongoDB 6+ running locally on `mongodb://localhost:27017`, or any URI supplied via `MONGODB_URI`
+- A MongoDB cluster, from `MONGODB_URI` (or `mongodb://localhost:27017`). Each service uses its own database on it.
 
 ## Run
 
+Start both services, each in its own terminal or IDE run configuration, with the same `MONGODB_URI`:
+
 ```bash
-./gradlew bootRun          # Windows PowerShell: .\gradlew.bat bootRun
+./gradlew :oh-access-core:bootRun   # Windows PowerShell: .\gradlew.bat :oh-access-core:bootRun
+./gradlew :oh-auth-gtwy:bootRun
 ```
 
-The `dev` profile is active by default. The API listens on http://localhost:8080.
+The `dev` profile is active by default. Point the Angular app and Postman at http://localhost:8080 only.
 
 | URL | Purpose |
 |---|---|
-| http://localhost:8080/actuator/health | `{"status":"UP"}` once MongoDB is reachable |
-| http://localhost:8080/swagger-ui.html | API docs (dev only) |
+| http://localhost:8080/actuator/health | Gateway `{"status":"UP"}` once MongoDB is reachable |
+| http://localhost:8080/swagger-ui.html | Gateway and auth API docs (dev only) |
+| http://127.0.0.1:8082/swagger-ui.html | oh-access-core API docs (dev only, from this machine) |
 
 ## Test
 
 ```bash
-./gradlew test
+./gradlew test            # all modules; e.g. ./gradlew :oh-auth-gtwy:test for one
 ```
 
 ## Environment variables
@@ -33,10 +63,15 @@ Secrets are never committed. Set them in your shell or IDE run configuration.
 
 | Variable | Required | Dev default | Purpose |
 |---|---|---|---|
-| `SPRING_PROFILES_ACTIVE` | no | `dev` | `dev` or `prod` |
-| `MONGODB_URI` | prod | `mongodb://localhost:27017/onehostel` | MongoDB connection string, including database name |
-| `CORS_ALLOWED_ORIGINS` | prod | `http://localhost:4200` | Comma-separated browser origins allowed to call the API |
-| `SERVER_PORT` | no | `8080` | HTTP port |
+| `SPRING_PROFILES_ACTIVE` | no | `dev` | `dev` or `prod` (both services) |
+| `MONGODB_URI` | prod | `mongodb://localhost:27017` | MongoDB cluster (both services). The database name comes from each service, not the URI |
+| `AUTH_GTWY_DB` / `ACCESS_CORE_DB` | no | `onehostel_auth` / `onehostel_core` | Each service's database |
+| `GATEWAY_SIGNING_SECRET` | prod | public dev-only value | Signs the caller identity the gateway forwards. **Same value in both services** |
+| `ACCESS_CORE_URI` | no | `http://127.0.0.1:8082` | Where the gateway forwards business requests |
+| `ACCESS_CORE_PORT` / `ACCESS_CORE_ADDRESS` | no | `8082` / `127.0.0.1` | oh-access-core listen port and address (loopback keeps it private) |
+| `SEED_DEMO_ORGANIZATION` | no | `true` (dev only) | oh-access-core creates the demo organization `org-sunrise-hostels` |
+| `CORS_ALLOWED_ORIGINS` | prod | `http://localhost:4200` | Comma-separated browser origins allowed to call the gateway |
+| `SERVER_PORT` | no | `8080` | Gateway HTTP port |
 | `JWT_SECRET` | prod | public dev-only key | Base64 of ≥ 32 random bytes (`openssl rand -base64 48`) |
 | `JWT_EXPIRATION` | no | `15m` | Access token lifetime |
 | `JWT_REFRESH_EXPIRATION` | no | `7d` | Refresh token (cookie) lifetime |
@@ -159,18 +194,33 @@ To add a module, extend `HostelAbstractDocument` (the document), `HostelAbstract
 ## Package layout
 
 ```
-com.onehostel
-├── config       AppProperties (app.*), CORS, OpenAPI
-├── controller   REST endpoints (thin — delegate to services); helper/ HostelCoreController (shared base)
-├── constants    Collection names, routes/headers, defaults, shared enums (Role, Status, ...)
-├── dto          Feature request/response records; helper/ envelopes, paging, shared DTOs
-├── exception    ErrorCode (code + HTTP status + message), OneHostelException, GlobalExceptionHandler
-├── filter       CorrelationIdFilter (X-Correlation-Id → logs + response header)
-├── model        MongoDB documents; helper/ HostelAbstractDocument (shared base)
-├── repository   Spring Data repositories
-├── security     SecurityConfig, JWT, 401/403 handlers
-└── service      Business logic; helper/ HostelAbstractInterface, HostelAbstractService
+oh-common        com.onehostel.common
+├── constants    CollectionNames (one registry of C00xx codes), routes, defaults, enums (Role, Permission, ...)
+├── dto          CommonRequestObject / CommonResponseObject envelopes, PageResponse, IdRequest, ListFilter
+├── exception    ErrorCode, OneHostelException, GlobalExceptionHandler
+├── security     AuthenticatedUser, GatewayIdentity (signed identity headers), 401/403 writers
+├── search       HostelCommonSearch mirror (each service mirrors its own records)
+├── web          CorrelationIdFilter
+└── config       Mongo auditing, OpenAPI
+
+oh-auth-gtwy     com.onehostel.AuthGatewayApplication, com.onehostel.authgtwy
+├── gateway      GatewayRoutesConfig, IdentityForwarder, EndpointPrivilege, PublicEndpoint* (DB-driven
+│                permit-all list), GatewayUserCacheService, GatewayExceptionHandler
+├── security     SecurityConfig, GatewayAuthenticationFilter, JwtService, rate limiter, refresh cookie
+├── controller   AuthController (/api/v1/auth/**)
+├── service      AuthService, OTP, refresh tokens, user search mirror
+├── model        User (C0001), OtpChallenge (C0007), RefreshToken (C0008)
+└── config       AppProperties, CORS, UserSeeder, UserMigration
+
+oh-access-core   com.onehostel.AccessCoreApplication, com.onehostel.accesscore
+├── security     SecurityConfig, GatewayIdentityFilter (accepts only gateway-signed requests)
+├── controller   OrganizationController, HostelController; helper/ HostelCoreController (shared base)
+├── service      OrganizationService, HostelService; helper/ HostelAbstractInterface, HostelAbstractService
+├── model        Organization (C0010), Hostel (C0002); helper/ HostelAbstractDocument (shared base)
+└── config       CoreProperties, DemoOrganizationSeeder
 ```
+
+A new business endpoint needs an `EndpointPrivilege` entry in the gateway, or the gateway refuses it with `403`.
 
 ## API conventions
 

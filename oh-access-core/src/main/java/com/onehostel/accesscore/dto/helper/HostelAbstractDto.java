@@ -1,4 +1,4 @@
-package com.onehostel.dto.helper;
+package com.onehostel.accesscore.dto.helper;
 
 public interface HostelAbstractDto {
 

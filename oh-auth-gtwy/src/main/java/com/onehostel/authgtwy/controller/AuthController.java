@@ -1,4 +1,4 @@
-package com.onehostel.controller;
+package com.onehostel.authgtwy.controller;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,19 +11,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.onehostel.constants.ServiceConstants;
-import com.onehostel.dto.auth.LoginRequest;
-import com.onehostel.dto.auth.LoginResponse;
-import com.onehostel.dto.auth.OtpSendRequest;
-import com.onehostel.dto.auth.OtpSendResponse;
-import com.onehostel.dto.auth.UserProfile;
-import com.onehostel.dto.helper.CommonRequestObject;
-import com.onehostel.dto.helper.CommonResponseObject;
-import com.onehostel.security.AuthenticatedUser;
-import com.onehostel.security.RefreshCookie;
-import com.onehostel.service.AuthService;
-import com.onehostel.service.RefreshTokenService;
-import com.onehostel.service.otp.OtpService;
+import com.onehostel.authgtwy.dto.LoginRequest;
+import com.onehostel.authgtwy.dto.LoginResponse;
+import com.onehostel.authgtwy.dto.OtpSendRequest;
+import com.onehostel.authgtwy.dto.OtpSendResponse;
+import com.onehostel.authgtwy.dto.UserProfile;
+import com.onehostel.authgtwy.security.RefreshCookie;
+import com.onehostel.authgtwy.service.AuthService;
+import com.onehostel.authgtwy.service.RefreshTokenService;
+import com.onehostel.authgtwy.service.otp.OtpService;
+import com.onehostel.common.constants.ServiceConstants;
+import com.onehostel.common.dto.CommonRequestObject;
+import com.onehostel.common.dto.CommonResponseObject;
+import com.onehostel.common.security.AuthenticatedUser;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;

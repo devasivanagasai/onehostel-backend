@@ -1,4 +1,4 @@
-package com.onehostel.constants;
+package com.onehostel.common.constants;
 
 import java.time.Duration;
 import java.time.ZoneId;
@@ -24,6 +24,9 @@ public final class GlobalConstants {
     public static final String DEFAULT_CURRENCY_SYMBOL = "₹";
     /** Mobile numbers are stored as 10 digits; this is their implied country code. */
     public static final String DEFAULT_COUNTRY_CODE = "+91";
+
+    /** Dev: the organization the demo owner and tenant belong to (seeded by both services). */
+    public static final String DEMO_ORGANIZATION_ID = "org-sunrise-hostels";
 
     // --- Field limits ---
     /** RFC 5321 maximum for an email address. */

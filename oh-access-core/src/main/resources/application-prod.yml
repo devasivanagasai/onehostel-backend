@@ -1,0 +1,7 @@
+# Production. No defaults: MONGODB_URI and GATEWAY_SIGNING_SECRET must be set, otherwise the
+# service fails to start.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

@@ -1,4 +1,4 @@
-package com.onehostel.model;
+package com.onehostel.authgtwy.model;
 
 import java.time.Instant;
 
@@ -8,9 +8,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.onehostel.constants.CollectionNames;
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.constants.CommonEnumHelper.UserStatus;
+import com.onehostel.common.constants.CollectionNames;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.constants.CommonEnumHelper.UserStatus;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

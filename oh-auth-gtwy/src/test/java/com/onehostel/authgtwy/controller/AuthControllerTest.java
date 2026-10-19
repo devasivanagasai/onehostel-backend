@@ -1,4 +1,4 @@
-package com.onehostel.controller;
+package com.onehostel.authgtwy.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -36,14 +36,14 @@ import org.springframework.test.web.servlet.RequestBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.constants.CommonEnumHelper.UserStatus;
-import com.onehostel.dto.auth.OtpSendResponse;
-import com.onehostel.exception.ErrorCode;
-import com.onehostel.model.User;
-import com.onehostel.repository.UserRepository;
-import com.onehostel.service.RefreshTokenService;
-import com.onehostel.service.otp.OtpService;
+import com.onehostel.authgtwy.dto.OtpSendResponse;
+import com.onehostel.authgtwy.model.User;
+import com.onehostel.authgtwy.repository.UserRepository;
+import com.onehostel.authgtwy.service.RefreshTokenService;
+import com.onehostel.authgtwy.service.otp.OtpService;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.constants.CommonEnumHelper.UserStatus;
+import com.onehostel.common.exception.ErrorCode;
 
 import jakarta.servlet.http.Cookie;
 
@@ -324,16 +324,16 @@ class AuthControllerTest {
         String owner = loginAndGetToken(login("owner@onehostel.com", PASSWORD, "PASSWORD", "HOSTEL_OWNER"));
         String tenant = loginAndGetToken(login("tenant@onehostel.com", PASSWORD, "PASSWORD", "HOSTEL_TENANT"));
 
-        // 404 = got past security (no endpoint there yet); 403 = role refused.
-        expectStatus("/api/v1/admin/anything", admin, 404);
+        // 503 = passed the gateway's checks and was routed (no access-core runs in tests); 403 = role refused.
+        expectStatus("/api/v1/admin/anything", admin, 503);
         expectStatus("/api/v1/admin/anything", owner, 403);
         expectStatus("/api/v1/admin/anything", tenant, 403);
 
-        expectStatus("/api/v1/owner/anything", owner, 404);
+        expectStatus("/api/v1/owner/anything", owner, 503);
         expectStatus("/api/v1/owner/anything", admin, 403);
         expectStatus("/api/v1/owner/anything", tenant, 403);
 
-        expectStatus("/api/v1/tenant/anything", tenant, 404);
+        expectStatus("/api/v1/tenant/anything", tenant, 503);
         expectStatus("/api/v1/tenant/anything", admin, 403);
         expectStatus("/api/v1/tenant/anything", owner, 403);
     }
@@ -349,6 +349,7 @@ class AuthControllerTest {
         user.setId(id);
         user.setPhoneNumber(phone);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
         if (phone != null) {
             when(userRepository.findByPhoneNumber(eq(phone))).thenReturn(Optional.of(user));
         }

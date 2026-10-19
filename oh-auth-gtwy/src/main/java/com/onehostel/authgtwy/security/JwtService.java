@@ -1,4 +1,4 @@
-package com.onehostel.security;
+package com.onehostel.authgtwy.security;
 
 import java.time.Instant;
 import java.util.Date;
@@ -9,9 +9,10 @@ import javax.crypto.SecretKey;
 
 import org.springframework.stereotype.Service;
 
-import com.onehostel.config.AppProperties;
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.model.User;
+import com.onehostel.authgtwy.config.AppProperties;
+import com.onehostel.authgtwy.model.User;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.security.AuthenticatedUser;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

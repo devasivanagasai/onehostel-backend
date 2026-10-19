@@ -1,18 +1,17 @@
-package com.onehostel.security;
+package com.onehostel.authgtwy.security;
 
 import java.io.IOException;
 import java.time.Instant;
 
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.onehostel.config.AppProperties;
-import com.onehostel.constants.ServiceConstants;
-import com.onehostel.exception.ErrorCode;
+import com.onehostel.authgtwy.config.AppProperties;
+import com.onehostel.common.constants.ServiceConstants;
+import com.onehostel.common.exception.ErrorCode;
+import com.onehostel.common.security.SecurityErrorWriter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,7 +25,6 @@ import jakarta.servlet.http.HttpServletResponse;
  * X-Forwarded-For is never read directly, since any client can forge it.
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class AuthRateLimitFilter extends OncePerRequestFilter {
 
     private final AuthRateLimiter limiter;

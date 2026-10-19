@@ -1,4 +1,4 @@
-package com.onehostel.config;
+package com.onehostel.authgtwy.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -18,9 +18,9 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.model.User;
-import com.onehostel.repository.UserRepository;
+import com.onehostel.authgtwy.model.User;
+import com.onehostel.authgtwy.repository.UserRepository;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
 
 class UserSeederTest {
 
@@ -37,7 +37,8 @@ class UserSeederTest {
                 new AppProperties.Jwt("s", Duration.ofMinutes(15), Duration.ofDays(7), "i"),
                 new AppProperties.Bootstrap("admin@onehostel.com", "superadmin", "Admin@OneHostel2026", "246810",
                         "OneHostel Super Admin", false, false),
-                new AppProperties.RateLimit(10));
+                new AppProperties.RateLimit(10),
+                new AppProperties.Gateway("http://127.0.0.1:8082", "test-signing-secret", Duration.ofSeconds(60), false));
         seeder = new UserSeeder(properties, userRepository, new BCryptPasswordEncoder(4));
     }
 

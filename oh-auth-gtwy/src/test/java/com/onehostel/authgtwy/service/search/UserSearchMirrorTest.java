@@ -1,4 +1,4 @@
-package com.onehostel.service.search;
+package com.onehostel.authgtwy.service.search;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,12 +15,13 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.data.mongodb.core.mapping.event.AfterDeleteEvent;
 import org.springframework.data.mongodb.core.mapping.event.AfterSaveEvent;
 
-import com.onehostel.constants.CommonEnumHelper.EntityType;
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.constants.CommonEnumHelper.UserStatus;
-import com.onehostel.model.HostelCommonSearch;
-import com.onehostel.model.User;
-import com.onehostel.repository.HostelCommonSearchRepository;
+import com.onehostel.authgtwy.model.User;
+import com.onehostel.common.constants.CommonEnumHelper.EntityType;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.constants.CommonEnumHelper.UserStatus;
+import com.onehostel.common.search.HostelCommonSearch;
+import com.onehostel.common.search.HostelCommonSearchRepository;
+import com.onehostel.common.search.SearchMirrorService;
 
 class UserSearchMirrorTest {
 
@@ -53,7 +54,7 @@ class UserSearchMirrorTest {
         assertThat(row.getText11()).isEqualTo("h1");
         assertThat(row.getText12()).isEqualTo("ROOM-101-BED-A");
         assertThat(row.getText13()).isEqualTo("101");
-        assertThat(row.getList1()).containsExactly("HOSTEL_READ");
+        assertThat(row.getList1()).containsExactly("ACCOUNT_SELF", "HOSTEL_READ", "ORGANIZATION_READ", "TENANT_AREA");
         assertThat(row.toString() + row.getText6() + row.getText7()).doesNotContain("$2a$");
     }
 

@@ -1,4 +1,4 @@
-package com.onehostel.filter;
+package com.onehostel.common.web;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -11,7 +11,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.onehostel.constants.ServiceConstants;
+import com.onehostel.common.constants.ServiceConstants;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

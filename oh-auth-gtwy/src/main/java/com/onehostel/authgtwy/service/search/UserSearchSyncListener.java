@@ -1,4 +1,4 @@
-package com.onehostel.service.search;
+package com.onehostel.authgtwy.service.search;
 
 import org.bson.Document;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
@@ -6,8 +6,9 @@ import org.springframework.data.mongodb.core.mapping.event.AfterDeleteEvent;
 import org.springframework.data.mongodb.core.mapping.event.AfterSaveEvent;
 import org.springframework.stereotype.Component;
 
-import com.onehostel.constants.CommonEnumHelper.EntityType;
-import com.onehostel.model.User;
+import com.onehostel.authgtwy.model.User;
+import com.onehostel.common.constants.CommonEnumHelper.EntityType;
+import com.onehostel.common.search.SearchMirrorService;
 
 import lombok.RequiredArgsConstructor;
 

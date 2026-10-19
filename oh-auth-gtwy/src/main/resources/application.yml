@@ -1,4 +1,4 @@
-# Shared settings for every profile. Secrets are NEVER written here — they come
+# oh-auth-gtwy: the only public entry point (gateway + authentication). Shared settings for every profile. Secrets are NEVER written here — they come
 # from environment variables (see README.md, "Environment variables").
 server:
   port: ${SERVER_PORT:8080}
@@ -10,12 +10,14 @@ server:
 
 spring:
   application:
-    name: onehostel-backend
+    name: oh-auth-gtwy
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   data:
     mongodb:
       uri: ${MONGODB_URI}
+      # This service's own database; the URI only points at the cluster.
+      database: ${AUTH_GTWY_DB:onehostel_auth}
       auto-index-creation: true
 
 app:
@@ -40,6 +42,13 @@ app:
     demo-users: false
   rate-limit:
     auth-requests-per-minute: ${AUTH_RATE_LIMIT_PER_MINUTE:10}
+  gateway:
+    # Where /api/v1/** (except /auth and /gateway) is forwarded.
+    access-core-uri: ${ACCESS_CORE_URI:http://127.0.0.1:8082}
+    # Signs the caller identity sent downstream; every downstream service holds the same value.
+    signing-secret: ${GATEWAY_SIGNING_SECRET}
+    user-cache-ttl: 60s
+    seed-public-endpoints: true
 
 management:
   endpoints:

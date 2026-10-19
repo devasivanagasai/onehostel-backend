@@ -1,4 +1,4 @@
-package com.onehostel.dto.helper;
+package com.onehostel.common.dto;
 
 import java.time.Instant;
 import java.util.Set;
@@ -7,9 +7,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import com.onehostel.constants.CommonEnumHelper.ClientSource;
-import com.onehostel.constants.CommonEnumHelper.SortOrder;
-import com.onehostel.constants.GlobalConstants;
+import com.onehostel.common.constants.CommonEnumHelper.ClientSource;
+import com.onehostel.common.constants.CommonEnumHelper.SortOrder;
+import com.onehostel.common.constants.GlobalConstants;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

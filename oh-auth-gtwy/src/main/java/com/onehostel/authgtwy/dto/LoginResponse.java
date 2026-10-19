@@ -1,4 +1,4 @@
-package com.onehostel.dto.auth;
+package com.onehostel.authgtwy.dto;
 
 /**
  * Same for every login flow and for refresh. Send {@code accessToken} as

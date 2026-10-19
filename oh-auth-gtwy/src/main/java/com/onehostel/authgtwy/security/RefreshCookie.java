@@ -1,15 +1,15 @@
-package com.onehostel.security;
+package com.onehostel.authgtwy.security;
 
 import java.time.Duration;
 
 import org.springframework.http.ResponseCookie;
 
-import com.onehostel.constants.ServiceConstants;
+import com.onehostel.common.constants.ServiceConstants;
 
 /**
  * The refresh token cookie: HttpOnly (JavaScript cannot read it), Secure, SameSite=Strict
  * (not sent on cross-site requests, which also blocks CSRF on refresh/logout) and scoped to
- * the auth endpoints. Browsers accept Secure cookies on http://localhost, so dev works too.
+ * the auth endpoints. Browsers accept Secure cookies on <a href="http://localhost">...</a>, so dev works too.
  */
 public final class RefreshCookie {
 

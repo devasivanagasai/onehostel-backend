@@ -1,4 +1,4 @@
-package com.onehostel.service;
+package com.onehostel.accesscore.service;
 
 import java.util.List;
 import java.util.Set;
@@ -8,12 +8,12 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import com.onehostel.constants.CommonEnumHelper.Status;
-import com.onehostel.dto.hostel.HostelRequest;
-import com.onehostel.dto.hostel.HostelView;
-import com.onehostel.exception.ErrorCode;
-import com.onehostel.model.Hostel;
-import com.onehostel.service.helper.HostelAbstractService;
+import com.onehostel.accesscore.dto.hostel.HostelRequest;
+import com.onehostel.accesscore.dto.hostel.HostelView;
+import com.onehostel.accesscore.model.Hostel;
+import com.onehostel.accesscore.service.helper.HostelAbstractService;
+import com.onehostel.common.constants.CommonEnumHelper.Status;
+import com.onehostel.common.exception.ErrorCode;
 
 @Service
 public class HostelService extends HostelAbstractService<Hostel, HostelRequest, HostelView> {

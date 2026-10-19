@@ -1,10 +1,10 @@
-package com.onehostel.dto.auth;
+package com.onehostel.authgtwy.dto;
 
 import java.util.List;
 
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.constants.CommonEnumHelper.UserStatus;
-import com.onehostel.model.User;
+import com.onehostel.authgtwy.model.User;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.constants.CommonEnumHelper.UserStatus;
 
 public record UserProfile(
         String userId,

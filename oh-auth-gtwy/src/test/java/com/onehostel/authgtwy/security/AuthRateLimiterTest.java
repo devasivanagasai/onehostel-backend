@@ -1,4 +1,4 @@
-package com.onehostel.security;
+package com.onehostel.authgtwy.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,7 +12,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onehostel.config.AppProperties;
+import com.onehostel.authgtwy.config.AppProperties;
+import com.onehostel.common.security.SecurityErrorWriter;
 
 class AuthRateLimiterTest {
 
@@ -35,7 +36,8 @@ class AuthRateLimiterTest {
     void filterAnswers429WithRetryAfterOnRateLimitedPathsOnly() throws Exception {
         AppProperties properties = new AppProperties(new AppProperties.Cors(List.of("http://localhost:4200")),
                 new AppProperties.Jwt("s", Duration.ofMinutes(15), Duration.ofDays(7), "i"), null,
-                new AppProperties.RateLimit(1));
+                new AppProperties.RateLimit(1),
+                new AppProperties.Gateway("http://127.0.0.1:8082", "test-signing-secret", Duration.ofSeconds(60), false));
         AuthRateLimitFilter filter = new AuthRateLimitFilter(properties,
                 new SecurityErrorWriter(new ObjectMapper().findAndRegisterModules()));
 

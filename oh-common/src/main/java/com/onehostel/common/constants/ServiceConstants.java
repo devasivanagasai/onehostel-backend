@@ -1,4 +1,4 @@
-package com.onehostel.constants;
+package com.onehostel.common.constants;
 
 import java.time.Duration;
 import java.util.Set;
@@ -38,6 +38,10 @@ public final class ServiceConstants {
 
     // Feature modules. Each exposes the uniform actions below (HostelCoreController).
     public static final String HOSTEL_BASE = API_BASE + "/hostels";
+    public static final String ORGANIZATION_BASE = API_BASE + "/organizations";
+
+    /** Served by oh-auth-gtwy itself, never routed: gateway administration. */
+    public static final String GATEWAY_BASE = API_BASE + "/gateway";
 
     public static final String ACTION_CREATE = "/create";
     public static final String ACTION_UPDATE = "/update";

@@ -1,4 +1,4 @@
-package com.onehostel.service;
+package com.onehostel.authgtwy.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,10 +20,10 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import com.mongodb.client.result.UpdateResult;
-import com.onehostel.config.AppProperties;
-import com.onehostel.exception.ErrorCode;
-import com.onehostel.exception.OneHostelException;
-import com.onehostel.model.RefreshToken;
+import com.onehostel.authgtwy.config.AppProperties;
+import com.onehostel.authgtwy.model.RefreshToken;
+import com.onehostel.common.exception.ErrorCode;
+import com.onehostel.common.exception.OneHostelException;
 
 class RefreshTokenServiceTest {
 
@@ -35,7 +35,8 @@ class RefreshTokenServiceTest {
         mongoTemplate = mock(MongoTemplate.class);
         AppProperties properties = new AppProperties(new AppProperties.Cors(List.of("http://localhost:4200")),
                 new AppProperties.Jwt("secret", Duration.ofMinutes(15), Duration.ofDays(7), "onehostel"), null,
-                new AppProperties.RateLimit(10));
+                new AppProperties.RateLimit(10),
+                new AppProperties.Gateway("http://127.0.0.1:8082", "test-signing-secret", Duration.ofSeconds(60), false));
         service = new RefreshTokenService(mongoTemplate, properties);
         when(mongoTemplate.updateMulti(any(Query.class), any(Update.class), eq(RefreshToken.class)))
                 .thenReturn(UpdateResult.acknowledged(1, 1L, null));

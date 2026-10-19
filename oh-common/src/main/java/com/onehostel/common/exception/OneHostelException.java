@@ -1,4 +1,4 @@
-package com.onehostel.exception;
+package com.onehostel.common.exception;
 
 public class OneHostelException extends RuntimeException {
 

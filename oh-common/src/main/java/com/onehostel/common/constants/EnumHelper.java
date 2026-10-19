@@ -1,4 +1,4 @@
-package com.onehostel.constants;
+package com.onehostel.common.constants;
 
 import java.util.Arrays;
 import java.util.List;

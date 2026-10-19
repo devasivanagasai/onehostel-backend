@@ -1,11 +1,11 @@
-package com.onehostel.model;
+package com.onehostel.accesscore.model;
 
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.onehostel.constants.CollectionNames;
-import com.onehostel.constants.CommonEnumHelper.Status;
-import com.onehostel.model.helper.HostelAbstractDocument;
+import com.onehostel.accesscore.model.helper.HostelAbstractDocument;
+import com.onehostel.common.constants.CollectionNames;
+import com.onehostel.common.constants.CommonEnumHelper.Status;
 
 import lombok.Getter;
 import lombok.Setter;

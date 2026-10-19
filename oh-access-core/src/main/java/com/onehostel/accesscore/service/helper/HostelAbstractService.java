@@ -1,4 +1,4 @@
-package com.onehostel.service.helper;
+package com.onehostel.accesscore.service.helper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,13 +10,13 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import com.onehostel.dto.helper.CommonRequestObject;
-import com.onehostel.dto.helper.HostelAbstractDto;
-import com.onehostel.dto.helper.ListFilter;
-import com.onehostel.dto.helper.PageResponse;
-import com.onehostel.exception.ErrorCode;
-import com.onehostel.model.helper.HostelAbstractDocument;
-import com.onehostel.security.AuthenticatedUser;
+import com.onehostel.accesscore.dto.helper.HostelAbstractDto;
+import com.onehostel.accesscore.model.helper.HostelAbstractDocument;
+import com.onehostel.common.dto.CommonRequestObject;
+import com.onehostel.common.dto.ListFilter;
+import com.onehostel.common.dto.PageResponse;
+import com.onehostel.common.exception.ErrorCode;
+import com.onehostel.common.security.AuthenticatedUser;
 
 public abstract class HostelAbstractService<E extends HostelAbstractDocument, D extends HostelAbstractDto, V>
         implements HostelAbstractInterface<E, D, V> {

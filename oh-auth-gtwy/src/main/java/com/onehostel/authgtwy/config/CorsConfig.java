@@ -1,4 +1,4 @@
-package com.onehostel.config;
+package com.onehostel.authgtwy.config;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.onehostel.constants.ServiceConstants;
+import com.onehostel.common.constants.ServiceConstants;
 
 /**
  * CORS rules, applied by Spring Security ({@code http.cors(...)} in SecurityConfig) so

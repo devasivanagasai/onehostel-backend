@@ -3,10 +3,13 @@
 spring:
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/onehostel}
+      uri: ${MONGODB_URI:mongodb://localhost:27017}
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  gateway:
+    # Publicly known dev-only secret; must match oh-access-core's dev default.
+    signing-secret: ${GATEWAY_SIGNING_SECRET:onehostel-dev-only-gateway-signing-secret-do-not-use-in-prod}
   jwt:
     # Publicly known dev-only key. Tokens signed with it must never be trusted outside dev.
     secret: ${JWT_SECRET:b25laG9zdGVsLWRldi1vbmx5LWp3dC1zZWNyZXQtZG8tbm90LXVzZS1pbi1wcm9kISE=}

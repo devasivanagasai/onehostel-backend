@@ -1,4 +1,4 @@
-package com.onehostel.model.helper;
+package com.onehostel.accesscore.model.helper;
 
 import java.time.Instant;
 import java.util.Map;

@@ -1,12 +1,12 @@
-package com.onehostel.service;
+package com.onehostel.authgtwy.service;
 
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.model.User;
-import com.onehostel.repository.UserRepository;
+import com.onehostel.authgtwy.model.User;
+import com.onehostel.authgtwy.repository.UserRepository;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
 
 import lombok.RequiredArgsConstructor;
 

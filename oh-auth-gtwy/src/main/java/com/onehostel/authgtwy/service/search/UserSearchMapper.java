@@ -1,9 +1,9 @@
-package com.onehostel.service.search;
+package com.onehostel.authgtwy.service.search;
 
-import com.onehostel.constants.CommonEnumHelper.EntityType;
-import com.onehostel.constants.GlobalConstants;
-import com.onehostel.model.HostelCommonSearch;
-import com.onehostel.model.User;
+import com.onehostel.authgtwy.model.User;
+import com.onehostel.common.constants.CommonEnumHelper.EntityType;
+import com.onehostel.common.constants.GlobalConstants;
+import com.onehostel.common.search.HostelCommonSearch;
 
 /**
  * User slots in HostelCommonSearch. Never mirrors secrets (password or passcode hashes).

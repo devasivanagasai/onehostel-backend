@@ -1,4 +1,4 @@
-package com.onehostel.security;
+package com.onehostel.authgtwy.security;
 
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.onehostel.constants.ServiceConstants;
+import com.onehostel.common.constants.ServiceConstants;
 
 /**
  * Phase 2 checks: protected paths answer 401 in our JSON format, the correlation id is

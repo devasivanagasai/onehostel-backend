@@ -1,4 +1,4 @@
-package com.onehostel.security;
+package com.onehostel.authgtwy.security;
 
 import java.time.Duration;
 import java.time.Instant;

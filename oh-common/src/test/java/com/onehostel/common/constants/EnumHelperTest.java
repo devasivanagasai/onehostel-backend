@@ -1,4 +1,4 @@
-package com.onehostel.constants;
+package com.onehostel.common.constants;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,9 +6,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.constants.CommonEnumHelper.Status;
-import com.onehostel.constants.EnumHelper.EnumOption;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.constants.CommonEnumHelper.Status;
+import com.onehostel.common.constants.EnumHelper.EnumOption;
 
 class EnumHelperTest {
 

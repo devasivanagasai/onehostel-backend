@@ -1,4 +1,4 @@
-package com.onehostel.security;
+package com.onehostel.common.security;
 
 import java.io.IOException;
 
@@ -6,8 +6,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onehostel.dto.helper.CommonResponseObject;
-import com.onehostel.exception.ErrorCode;
+import com.onehostel.common.dto.CommonResponseObject;
+import com.onehostel.common.exception.ErrorCode;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

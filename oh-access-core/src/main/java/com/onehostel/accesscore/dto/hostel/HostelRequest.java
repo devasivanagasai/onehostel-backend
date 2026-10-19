@@ -1,8 +1,8 @@
-package com.onehostel.dto.hostel;
+package com.onehostel.accesscore.dto.hostel;
 
-import com.onehostel.constants.CommonEnumHelper.Status;
-import com.onehostel.constants.GlobalConstants;
-import com.onehostel.dto.helper.HostelAbstractDto;
+import com.onehostel.accesscore.dto.helper.HostelAbstractDto;
+import com.onehostel.common.constants.CommonEnumHelper.Status;
+import com.onehostel.common.constants.GlobalConstants;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

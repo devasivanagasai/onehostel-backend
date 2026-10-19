@@ -1,4 +1,4 @@
-package com.onehostel.config;
+package com.onehostel.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

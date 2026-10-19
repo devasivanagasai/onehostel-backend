@@ -1,4 +1,4 @@
-package com.onehostel.service;
+package com.onehostel.authgtwy.service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -16,9 +16,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import com.onehostel.config.AppProperties;
-import com.onehostel.exception.ErrorCode;
-import com.onehostel.model.RefreshToken;
+import com.onehostel.authgtwy.config.AppProperties;
+import com.onehostel.authgtwy.model.RefreshToken;
+import com.onehostel.common.exception.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 

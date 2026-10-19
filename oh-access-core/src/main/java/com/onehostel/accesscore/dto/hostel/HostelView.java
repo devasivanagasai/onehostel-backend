@@ -1,9 +1,9 @@
-package com.onehostel.dto.hostel;
+package com.onehostel.accesscore.dto.hostel;
 
 import java.time.Instant;
 
-import com.onehostel.constants.CommonEnumHelper.Status;
-import com.onehostel.model.Hostel;
+import com.onehostel.accesscore.model.Hostel;
+import com.onehostel.common.constants.CommonEnumHelper.Status;
 
 public record HostelView(
         String id,

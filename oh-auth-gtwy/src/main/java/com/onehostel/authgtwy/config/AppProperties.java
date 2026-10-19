@@ -1,4 +1,4 @@
-package com.onehostel.config;
+package com.onehostel.authgtwy.config;
 
 import java.time.Duration;
 import java.util.List;
@@ -20,7 +20,21 @@ import jakarta.validation.constraints.NotNull;
 @Validated
 @ConfigurationProperties(prefix = "app")
 public record AppProperties(@NotNull @Valid Cors cors, @NotNull @Valid Jwt jwt, @Valid Bootstrap bootstrap,
-        @DefaultValue @Valid RateLimit rateLimit) {
+        @DefaultValue @Valid RateLimit rateLimit, @NotNull @Valid Gateway gateway) {
+
+    /**
+     * Routing and trust towards downstream services.
+     * <ul>
+     * <li>{@code accessCoreUri}: where /api/v1/** (except /auth and /gateway) is forwarded.</li>
+     * <li>{@code signingSecret}: signs the caller identity sent downstream; each service holds the same value.</li>
+     * <li>{@code userCacheTtl}: how long a user's account state is cached; a disabled or locked account is
+     * refused at most this long after the change.</li>
+     * <li>{@code seedPublicEndpoints}: store the built-in public endpoints in the database at startup.</li>
+     * </ul>
+     */
+    public record Gateway(@NotBlank String accessCoreUri, @NotBlank String signingSecret,
+            @DefaultValue("60s") Duration userCacheTtl, @DefaultValue("true") boolean seedPublicEndpoints) {
+    }
 
     /** Origins allowed to call the API from a browser, e.g. the Angular app. */
     public record Cors(@NotEmpty List<String> allowedOrigins) {

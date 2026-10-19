@@ -1,11 +1,11 @@
-package com.onehostel.dto.helper;
+package com.onehostel.common.dto;
 
 import java.time.Instant;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.onehostel.exception.ErrorCode;
-import com.onehostel.filter.CorrelationIdFilter;
+import com.onehostel.common.exception.ErrorCode;
+import com.onehostel.common.web.CorrelationIdFilter;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record CommonResponseObject<T>(

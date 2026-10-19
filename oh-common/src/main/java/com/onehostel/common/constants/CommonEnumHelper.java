@@ -1,4 +1,4 @@
-package com.onehostel.constants;
+package com.onehostel.common.constants;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.springframework.data.domain.Sort;
 
-import com.onehostel.constants.EnumHelper.EnumOption;
+import com.onehostel.common.constants.EnumHelper.EnumOption;
 
 /**
  * Enums shared across features, and their ready-made dropdown options.
@@ -23,12 +23,15 @@ public final class CommonEnumHelper {
      */
     public enum Role {
         /** Platform operator: every organization. */
-        SUPER_ADMIN(Set.of(Permission.values())),
+        SUPER_ADMIN(EnumSet.of(Permission.ACCOUNT_SELF, Permission.ADMIN_AREA, Permission.GATEWAY_MANAGE,
+                Permission.ORGANIZATION_READ, Permission.ORGANIZATION_MANAGE,
+                Permission.HOSTEL_READ, Permission.HOSTEL_CREATE, Permission.HOSTEL_UPDATE, Permission.HOSTEL_DELETE)),
         /** Runs one property group (organization) of hostels. */
-        HOSTEL_OWNER(EnumSet.of(Permission.HOSTEL_READ, Permission.HOSTEL_CREATE, Permission.HOSTEL_UPDATE,
-                Permission.HOSTEL_DELETE)),
+        HOSTEL_OWNER(EnumSet.of(Permission.ACCOUNT_SELF, Permission.OWNER_AREA, Permission.ORGANIZATION_READ,
+                Permission.HOSTEL_READ, Permission.HOSTEL_CREATE, Permission.HOSTEL_UPDATE, Permission.HOSTEL_DELETE)),
         /** Resident of a hostel. */
-        HOSTEL_TENANT(EnumSet.of(Permission.HOSTEL_READ));
+        HOSTEL_TENANT(EnumSet.of(Permission.ACCOUNT_SELF, Permission.TENANT_AREA, Permission.ORGANIZATION_READ,
+                Permission.HOSTEL_READ));
 
         private final Set<Permission> permissions;
 
@@ -46,7 +49,20 @@ public final class CommonEnumHelper {
         }
     }
 
+    /**
+     * What a role may do. The gateway maps every protected endpoint to one of these
+     * (EndpointPrivilege) and refuses the request when the caller's role lacks it.
+     */
     public enum Permission {
+        /** The signed-in user's own account: profile, password, sessions. */
+        ACCOUNT_SELF,
+        ADMIN_AREA,
+        OWNER_AREA,
+        TENANT_AREA,
+        /** Gateway administration, e.g. the public-endpoint list. */
+        GATEWAY_MANAGE,
+        ORGANIZATION_READ,
+        ORGANIZATION_MANAGE,
         HOSTEL_READ,
         HOSTEL_CREATE,
         HOSTEL_UPDATE,

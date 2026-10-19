@@ -1,10 +1,10 @@
-package com.onehostel.service;
+package com.onehostel.authgtwy.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import com.onehostel.service.LoginIdentifier.Kind;
+import com.onehostel.authgtwy.service.LoginIdentifier.Kind;
 
 class LoginIdentifierTest {
 

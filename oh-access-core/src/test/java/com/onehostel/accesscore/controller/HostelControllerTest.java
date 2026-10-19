@@ -1,13 +1,18 @@
-package com.onehostel.controller;
+package com.onehostel.accesscore.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,22 +26,22 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import com.onehostel.constants.CommonEnumHelper.Role;
-import com.onehostel.constants.CommonEnumHelper.Status;
-import com.onehostel.dto.helper.CommonRequestObject;
-import com.onehostel.dto.helper.ListFilter;
-import com.onehostel.dto.helper.PageResponse;
-import com.onehostel.dto.hostel.HostelRequest;
-import com.onehostel.dto.hostel.HostelView;
-import com.onehostel.model.User;
-import com.onehostel.security.AuthenticatedUser;
-import com.onehostel.security.JwtService;
-import com.onehostel.service.HostelService;
+import com.onehostel.accesscore.config.CoreProperties;
+import com.onehostel.accesscore.dto.hostel.HostelRequest;
+import com.onehostel.accesscore.dto.hostel.HostelView;
+import com.onehostel.accesscore.service.HostelService;
+import com.onehostel.common.constants.CommonEnumHelper.Role;
+import com.onehostel.common.constants.CommonEnumHelper.Status;
+import com.onehostel.common.dto.CommonRequestObject;
+import com.onehostel.common.dto.ListFilter;
+import com.onehostel.common.dto.PageResponse;
+import com.onehostel.common.security.AuthenticatedUser;
+import com.onehostel.common.security.GatewayIdentity;
 
 /**
- * Wiring of the generic HostelCoreController through HostelController: the payload type is
- * resolved from the subclass (so validation runs on HostelRequest), the principal carries the
- * token's organization, and responses use the standard envelope.
+ * oh-access-core behind the gateway: requests carry the caller as signed GatewayIdentity headers
+ * (what oh-auth-gtwy sends). Anything unsigned, forged or stale is refused, and the generic
+ * HostelCoreController still validates HostelRequest and passes the caller's organization on.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -47,29 +52,26 @@ class HostelControllerTest {
             { "requestObject": { "name": "Sunrise", "addressLine": "12 MG Road", "city": "Bengaluru",
               "state": "Karnataka", "pincode": "560001" } }""";
 
+    private static final AuthenticatedUser OWNER =
+            new AuthenticatedUser("o1", "owner@x.com", Role.HOSTEL_OWNER, "org-a", null, null);
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private JwtService jwtService;
+    private CoreProperties properties;
 
     @MockitoBean
     private HostelService hostelService;
 
-    private String ownerToken;
-
     @BeforeEach
     void setUp() {
-        User owner = new User("Owner", "owner@x.com", "hash", Role.HOSTEL_OWNER);
-        owner.setId("o1");
-        owner.setOrganizationId("org-a");
-        ownerToken = jwtService.issue(owner).token();
         when(hostelService.entityLabel()).thenReturn("Hostel");
     }
 
     @Test
     void invalidPayloadIsValidatedAsHostelRequest() throws Exception {
-        mockMvc.perform(call("/api/v1/hostels/create", "{ \"requestObject\": { \"name\": \"\", \"pincode\": \"0123\" } }"))
+        mockMvc.perform(signed("/api/v1/hostels/create", "{ \"requestObject\": { \"name\": \"\", \"pincode\": \"0123\" } }"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.errors[*].field").value(hasItem("requestObject.name")))
@@ -77,10 +79,10 @@ class HostelControllerTest {
     }
 
     @Test
-    void createReturns201WithTheTokensOrganization() throws Exception {
+    void createReturns201WithTheCallersOrganization() throws Exception {
         when(hostelService.create(any(), any())).thenReturn(view());
 
-        mockMvc.perform(call("/api/v1/hostels/create", VALID_HOSTEL))
+        mockMvc.perform(signed("/api/v1/hostels/create", VALID_HOSTEL))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.statusCode").value(201))
                 .andExpect(jsonPath("$.message").value("Hostel created successfully."))
@@ -90,15 +92,15 @@ class HostelControllerTest {
         ArgumentCaptor<AuthenticatedUser> user = ArgumentCaptor.forClass(AuthenticatedUser.class);
         verify(hostelService).create(dto.capture(), user.capture());
         assertThat(dto.getValue().name()).isEqualTo("Sunrise");
-        assertThat(user.getValue().organizationId()).isEqualTo("org-a");
+        assertThat(user.getValue()).isEqualTo(OWNER);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void getAllPassesFilterAndPaging() throws Exception {
-        when(hostelService.getAll(any(), any())).thenReturn(PageResponse.of(java.util.List.of(view()), 1, 5, 6));
+        when(hostelService.getAll(any(), any())).thenReturn(PageResponse.of(List.of(view()), 1, 5, 6));
 
-        mockMvc.perform(call("/api/v1/hostels/getall",
+        mockMvc.perform(signed("/api/v1/hostels/getall",
                 "{ \"requestObject\": { \"keyword\": \"sun\" }, \"page\": 1, \"size\": 5, \"sortField\": \"name\" }"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.responseObject.content[0].name").value("Sunrise"))
@@ -112,22 +114,91 @@ class HostelControllerTest {
 
     @Test
     void inquireRequiresAnId() throws Exception {
-        mockMvc.perform(call("/api/v1/hostels/inq", "{ \"requestObject\": { } }"))
+        mockMvc.perform(signed("/api/v1/hostels/inq", "{ \"requestObject\": { } }"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("requestObject.id"));
     }
 
+    // --- only the gateway gets in ---
+
     @Test
-    void callsWithoutATokenAreRejected() throws Exception {
-        mockMvc.perform(post("/api/v1/hostels/getall").contentType(MediaType.APPLICATION_JSON)
-                .content("{ \"requestObject\": { } }"))
+    void requestsThatDidNotComeThroughTheGatewayAreRejected() throws Exception {
+        mockMvc.perform(json("/api/v1/hostels/getall", "{ \"requestObject\": { } }"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
+
+        // A client that sets identity headers itself, without the gateway secret.
+        mockMvc.perform(json("/api/v1/hostels/getall", "{ \"requestObject\": { } }")
+                .header(GatewayIdentity.USER_ID, "o1").header(GatewayIdentity.ROLE, "SUPER_ADMIN")
+                .header(GatewayIdentity.TIMESTAMP, Instant.now().getEpochSecond())
+                .header(GatewayIdentity.SIGNATURE, "00ff"))
+                .andExpect(status().isUnauthorized());
+
+        // A raw JWT is not accepted here: only the gateway validates tokens.
+        mockMvc.perform(json("/api/v1/hostels/getall", "{ \"requestObject\": { } }")
+                .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.e30.x"))
+                .andExpect(status().isUnauthorized());
+        verify(hostelService, never()).getAll(any(), any());
+    }
+
+    @Test
+    void aSignatureForOneUserCannotBeReusedForAnother() throws Exception {
+        GatewayIdentity.Signed owner = sign(OWNER, "/api/v1/hostels/getall", Instant.now());
+        // Same signature, but the role changed to SUPER_ADMIN.
+        GatewayIdentity.Signed forged = new GatewayIdentity.Signed(owner.userId(), owner.email(), "SUPER_ADMIN",
+                owner.organizationId(), owner.hostelId(), owner.bedId(), owner.timestamp(), owner.signature());
+
+        mockMvc.perform(withIdentity(json("/api/v1/hostels/getall", "{ \"requestObject\": { } }"), forged))
                 .andExpect(status().isUnauthorized());
     }
 
-    private MockHttpServletRequestBuilder call(String path, String body) {
-        return post(path).header("Authorization", "Bearer " + ownerToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body);
+    @Test
+    void aSignatureForOnePathCannotBeReusedForAnother() throws Exception {
+        GatewayIdentity.Signed identity = sign(OWNER, "/api/v1/hostels/inq", Instant.now());
+
+        mockMvc.perform(withIdentity(json("/api/v1/hostels/delete", "{ \"requestObject\": { \"id\": \"h1\" } }"), identity))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void staleSignaturesAreRejected() throws Exception {
+        GatewayIdentity.Signed identity = sign(OWNER, "/api/v1/hostels/getall", Instant.now().minusSeconds(120));
+
+        mockMvc.perform(withIdentity(json("/api/v1/hostels/getall", "{ \"requestObject\": { } }"), identity))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void roleAreasAreEnforcedHereToo() throws Exception {
+        GatewayIdentity.Signed identity = sign(OWNER, "/api/v1/admin/anything", Instant.now());
+
+        mockMvc.perform(withIdentity(json("/api/v1/admin/anything", "{}"), identity))
+                .andExpect(status().isForbidden());
+    }
+
+    private MockHttpServletRequestBuilder signed(String path, String body) {
+        return withIdentity(json(path, body), sign(OWNER, path, Instant.now()));
+    }
+
+    private GatewayIdentity.Signed sign(AuthenticatedUser user, String path, Instant at) {
+        return GatewayIdentity.sign(properties.gateway().signingSecret().getBytes(StandardCharsets.UTF_8), user,
+                "POST", path, at);
+    }
+
+    private static MockHttpServletRequestBuilder withIdentity(MockHttpServletRequestBuilder request,
+            GatewayIdentity.Signed identity) {
+        return request.header(GatewayIdentity.USER_ID, identity.userId())
+                .header(GatewayIdentity.EMAIL, identity.email())
+                .header(GatewayIdentity.ROLE, identity.role())
+                .header(GatewayIdentity.ORGANIZATION_ID, identity.organizationId())
+                .header(GatewayIdentity.HOSTEL_ID, identity.hostelId())
+                .header(GatewayIdentity.BED_ID, identity.bedId())
+                .header(GatewayIdentity.TIMESTAMP, identity.timestamp())
+                .header(GatewayIdentity.SIGNATURE, identity.signature());
+    }
+
+    private static MockHttpServletRequestBuilder json(String path, String body) {
+        return post(path).contentType(MediaType.APPLICATION_JSON).content(body);
     }
 
     private static HostelView view() {

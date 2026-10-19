@@ -1,0 +1,10 @@
+# Layered on top of "dev" in tests, which run without a MongoDB server:
+# nothing may touch the database at startup.
+spring:
+  data:
+    mongodb:
+      auto-index-creation: false
+
+app:
+  bootstrap:
+    demo-organization: false

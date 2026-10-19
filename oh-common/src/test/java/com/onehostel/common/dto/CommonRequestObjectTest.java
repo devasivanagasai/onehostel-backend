@@ -1,4 +1,4 @@
-package com.onehostel.dto.helper;
+package com.onehostel.common.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import com.onehostel.constants.CommonEnumHelper.SortOrder;
+import com.onehostel.common.constants.CommonEnumHelper.SortOrder;
 
 class CommonRequestObjectTest {
 

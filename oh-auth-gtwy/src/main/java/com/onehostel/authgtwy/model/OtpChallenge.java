@@ -1,4 +1,4 @@
-package com.onehostel.model;
+package com.onehostel.authgtwy.model;
 
 import java.time.Instant;
 
@@ -6,7 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.onehostel.constants.CollectionNames;
+import com.onehostel.common.constants.CollectionNames;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

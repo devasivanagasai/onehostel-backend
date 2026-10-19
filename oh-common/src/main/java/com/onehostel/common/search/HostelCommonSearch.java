@@ -1,4 +1,4 @@
-package com.onehostel.model;
+package com.onehostel.common.search;
 
 import java.time.Instant;
 import java.util.List;
@@ -8,8 +8,8 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.onehostel.constants.CollectionNames;
-import com.onehostel.constants.CommonEnumHelper.EntityType;
+import com.onehostel.common.constants.CollectionNames;
+import com.onehostel.common.constants.CommonEnumHelper.EntityType;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
