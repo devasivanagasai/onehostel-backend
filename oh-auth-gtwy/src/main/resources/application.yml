@@ -1,0 +1,57 @@
+server:
+  port: ${SERVER_PORT:9001}
+
+spring:
+  application:
+    name: oh-auth-gtwy
+  profiles:
+    # Local development unless a profile is set explicitly (SPRING_PROFILES_ACTIVE=prod etc.)
+    default: local
+  config:
+    # Secrets come from the environment or a git-ignored .env in the repo root (module dir or root as working dir)
+    import: "optional:file:.env[.properties],optional:file:../.env[.properties]"
+
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/onehostel_db}
+      auto-index-creation: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/onehostel}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8080/realms/onehostel/protocol/openid-connect/certs}
+
+  cloud:
+    gateway:
+      # CORS is handled once in SecurityConfig; drop duplicates a downstream service may add
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+      routes:
+        - id: core-service-route
+          uri: ${CORE_SERVICE_URI:http://localhost:9002}
+          predicates:
+            - Path=/api/v1/core/**
+
+onehostel:
+  cors:
+    # Comma-separated list of frontend origins allowed to call the gateway
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  otp:
+    # true = log OTP codes and return them as devOtp. Only the "local" profile turns it on.
+    dev-mode: ${OTP_DEV_MODE:false}
+
+keycloak:
+  auth-server-url: ${KEYCLOAK_SERVER_URL:http://localhost:8080}
+  realm: ${KEYCLOAK_REALM:onehostel}
+  client-id: ${KEYCLOAK_CLIENT_ID:onehostel-backend}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:}
+  token-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/token
+  revoke-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/revoke
+  logout-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/logout
+  admin-url: ${keycloak.auth-server-url}/admin/realms/${keycloak.realm}
+  # Confidential client used for password reset (admin API) and OTP login (token exchange)
+  service-client-id: ${KEYCLOAK_SERVICE_CLIENT_ID:oh-auth-gtwy-service}
+  # No default on purpose: set it in the environment or in the git-ignored .env (see .env.example)
+  service-client-secret: ${KEYCLOAK_SERVICE_CLIENT_SECRET}

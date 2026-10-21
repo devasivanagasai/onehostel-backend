@@ -1,0 +1,34 @@
+# Local dependencies for oh-auth-gtwy (for machines with Docker).
+# Without Docker, use start-local.ps1 in this folder instead.
+# Secrets come from the repo-root .env (copy .env.example). From the repo root:
+#   docker compose --env-file .env -f infra/local/docker-compose.yml up -d
+services:
+  mongodb:
+    image: mongo:7.0.14
+    container_name: onehostel-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: onehostel_db
+    volumes:
+      - mongo-data:/data/db
+      - ./mongo/seed-users.js:/docker-entrypoint-initdb.d/seed-users.js:ro
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.7
+    container_name: onehostel-keycloak
+    # After first start, run keycloak/configure-token-exchange.ps1 once (OTP login needs it)
+    command: ["start-dev", "--http-port=8080", "--import-realm", "--features=token-exchange,admin-fine-grained-authz"]
+    ports:
+      - "8080:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:?set it in .env}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?set it in .env}
+      # Filled into the ${...} placeholders of the realm file during import
+      KEYCLOAK_SERVICE_CLIENT_SECRET: ${KEYCLOAK_SERVICE_CLIENT_SECRET:?set it in .env}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:?set it in .env}
+    volumes:
+      - ./keycloak/onehostel-realm.json:/opt/keycloak/data/import/onehostel-realm.json:ro
+
+volumes:
+  mongo-data:

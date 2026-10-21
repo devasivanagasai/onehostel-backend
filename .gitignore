@@ -1,0 +1,32 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.vscode/
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated
+.sts4-cache
+
+# OS
+.DS_Store
+Thumbs.db

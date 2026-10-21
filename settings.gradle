@@ -1,0 +1,10 @@
+rootProject.name = 'onehostel-backend'
+
+// Service port register: services start at 9001 and each new service takes the next number.
+// Set it as server.port: ${SERVER_PORT:<port>} in the service's application.yml.
+//   9001  oh-auth-gtwy
+//   9002  core service (routed by the gateway at /api/v1/core/**)
+// Libraries (no port): oh-access-core
+
+include 'oh-access-core'
+include 'oh-auth-gtwy'

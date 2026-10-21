@@ -1,0 +1,10 @@
+# Local development settings (active by default; see spring.profiles.default in application.yml)
+onehostel:
+  otp:
+    # Log OTP codes and return them in /otp/send responses as devOtp. Never in production.
+    dev-mode: ${OTP_DEV_MODE:true}
+  dev:
+    # Accept ANY 6-digit code on /otp/verify and /forgot-password/reset (after /otp/send),
+    # for requests from this machine only. A full login bypass: the app refuses to start
+    # with this set outside the local profile.
+    accept-any-otp: ${OTP_ACCEPT_ANY:true}
