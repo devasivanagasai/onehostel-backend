@@ -1,0 +1,3 @@
+com.onehostel.common.config.CommonWebAutoConfiguration
+com.onehostel.common.config.CommonMongoAutoConfiguration
+com.onehostel.common.config.CommonAsyncAutoConfiguration

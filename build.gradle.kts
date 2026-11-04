@@ -1,56 +1,18 @@
-plugins {
-    java
-    id("org.springframework.boot") version "3.5.9"
-    id("io.spring.dependency-management") version "1.1.7"
+// Aggregator only. In a composite build a subprojects {} or all projects {} block here configures
+// NOTHING in the included builds; shared configuration lives in build-logic convention plugins.
+val libraryBuilds = setOf("onehostel-tenancy", "onehostel-common", "onehostel-scheduler-core")
+val codeBuilds = gradle.includedBuilds.filter { it.name != "build-logic" }
+val applicationBuilds = codeBuilds.filter { it.name !in libraryBuilds }
+
+tasks.register("build") { dependsOn(codeBuilds.map { it.task(":build") }) }
+tasks.register("test") { dependsOn(codeBuilds.map { it.task(":test") }) }
+tasks.register("clean") { dependsOn(codeBuilds.map { it.task(":clean") }) }
+tasks.register("bootJar") { dependsOn(applicationBuilds.map { it.task(":bootJar") }) }
+tasks.register("publishLibraries") {
+    dependsOn(codeBuilds.filter { it.name in libraryBuilds }.map { it.task(":publishToMavenLocal") })
 }
 
-group = "com.onehostel"
-version = "0.0.1-SNAPSHOT"
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-repositories {
-    mavenCentral()
-}
-
-// Mockito loaded as a Java agent at test start-up (its documented setup for JDK 21+), instead of
-// attaching itself at runtime, which is deprecated and fails on some Windows machines.
-val mockitoAgent: Configuration = configurations.create("mockitoAgent")
-
-dependencies {
-    // --- Spring starters (versions managed by the Spring Boot BOM) ---
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-
-    // --- JWT (used from Phase 4) ---
-    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
-
-    // --- OpenAPI / Swagger UI ---
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17")
-
-    // --- Lombok ---
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-
-    // --- Test ---
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.security:spring-security-test")
-    testCompileOnly("org.projectlombok:lombok")
-    testAnnotationProcessor("org.projectlombok:lombok")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    mockitoAgent("org.mockito:mockito-core") { isTransitive = false }
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
-    jvmArgs("-javaagent:${mockitoAgent.asPath}")
+// ./gradlew bootRun-onehostel-gateway, bootRun-onehostel-access-core, ...
+applicationBuilds.forEach { build ->
+    tasks.register("bootRun-${build.name}") { dependsOn(build.task(":bootRun")) }
 }
