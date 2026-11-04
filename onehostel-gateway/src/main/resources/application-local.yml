@@ -1,0 +1,5 @@
+# Local development (the default profile). Readable logs; everything else comes from application.yml.
+logging:
+  level:
+    com.onehostel: DEBUG
+    org.springframework.cloud.gateway: INFO
