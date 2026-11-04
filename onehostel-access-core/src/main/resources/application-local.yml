@@ -1,0 +1,15 @@
+# Local development (the default profile).
+app:
+  otp:
+    # Log codes and return them in /otp/send replies as devOtp; no SMS/email is sent
+    dev-mode: ${OTP_DEV_MODE:true}
+    # Accept ANY 6-digit code from this machine (after /otp/send). A login bypass: refused outside "local".
+    accept-any-code: ${OTP_ACCEPT_ANY:true}
+
+springdoc:
+  api-docs:
+    enabled: true
+
+logging:
+  level:
+    com.onehostel: DEBUG
