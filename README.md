@@ -1,216 +1,127 @@
-# OneHostel-Backend
+# OneHostel backend
 
-Spring Boot 3.5.9 · Java 21 · MongoDB · Spring Security + JWT · Gradle (Kotlin DSL).
-REST API for the OneHostel Angular app.
+Spring Boot 3.5 · Java 21 · MongoDB · Keycloak · Gradle Kotlin DSL composite build.
+Microservices behind one gateway, serving the OneHostel Angular app. House rules: [CLAUDE.md](CLAUDE.md).
 
-## Prerequisites
+## Builds
 
-- JDK 21
-- MongoDB 6+ running locally on `mongodb://localhost:27017`, or any URI supplied via `MONGODB_URI`
+| Build | Kind | Port | What it is |
+|---|---|---|---|
+| `onehostel-gateway` | service | 9001 | Edge (Spring Cloud Gateway MVC). Verifies Keycloak tokens, strips and re-sets identity headers, CORS, rate limits, routing |
+| `onehostel-access-core` | service | 9002 | Authentication (password, OTP, refresh, logout, change/reset password) and users. Later: roles, privileges, workflow |
+| `onehostel-resident` | service | 9004 | Residents, admission, check-in/out, guardians (skeleton) |
+| `onehostel-property` | service | 9005 | Hostel → block → floor → room → bed (skeleton) |
+| `onehostel-billing` | service | 9006 | Fee plans, invoices, payments, refunds (skeleton) |
+| `onehostel-common` | library | – | Error catalogue, envelopes, base document, generic CRUD, audit trail, correlation id, `CurrentUser`, async executors |
+| `onehostel-tenancy` | library | – | `TenantContext` and the tenant boundary: every Mongo collection call is scoped to the caller's organization (ENFORCE) |
+| `onehostel-scheduler-core` | library | – | `HostelJob`: cluster-safe jobs with DB-held cron, run history, failure records, lease lock |
+| `build-logic` | build | – | Convention plugins (Java 21, Boot BOM, Lombok, JUnit, JaCoCo, Sonar, publishing) |
 
-## Run
+Versions: `gradle/libs.versions.toml` only.
 
-```bash
-./gradlew bootRun          # Windows PowerShell: .\gradlew.bat bootRun
+## Routes (gateway → service)
+
+| Path | Service |
+|---|---|
+| `/api/v1/auth/**`, `/api/v1/access/**` | access-core |
+| `/api/v1/resident/**` | resident |
+| `/api/v1/property/**` | property |
+| `/api/v1/billing/**` | billing |
+
+Public (no token): `/api/v1/auth/login`, `otp/send`, `otp/verify`, `forgot-password/reset`, `refresh-token`, `logout`. Everything else needs a Keycloak access token.
+Any signed-in user: `/api/v1/auth/change-password`, `GET /api/v1/access/privileges`, `GET/PUT /api/v1/access/me` (own profile). Every other `/api` call also needs a privilege (below).
+`/internal/**` is service-to-service only: the gateway has no route to it.
+
+## Access control (privileges)
+
+- **Catalogue:** every privilege is declared once in `onehostel-access-core/.../helper/PrivilegeCatalog.java`, with:
+  - its code;
+  - the app pages it opens (`uiRoutes`);
+  - the API calls it allows (`apis`, method + Ant path);
+  - the roles it is granted by default.
+- **Bits:**
+  - At startup access-core syncs the catalogue into the `privileges` collection.
+  - A new code gets the next free bit, and a removed code is retired.
+  - Bits are never reused or edited by hand.
+- **Role grants:** stored in `role_privileges`, one document per role.
+  - Catalogue defaults are applied once, so a privilege an admin removes stays removed.
+  - Change them with `GET /api/v1/access/roles` and `PUT /api/v1/access/roles/{role}/privileges` (privilege `ROLE_MANAGE`).
+  - SUPER_ADMIN cannot lose `ROLE_MANAGE`.
+- **privToken:** login, OTP verify and refresh return `priv_token`: one character per bit, `1` where the access token's roles hold it.
+- **Gateway:** `PrivilegeFilter` fetches the matrix from `/internal/v1/privileges/matrix` and caches it for `PRIVILEGE_CACHE_TTL`.
+  - It allows a call only when a privilege covering the call's method and path has its bit set in one of the caller's role tokens.
+  - A call that no privilege covers gets 403, so a new endpoint needs its privilege first.
+- **Angular:** these all test the same bit against the catalogue from `GET /api/v1/access/privileges`:
+  - `AuthService.canAccess(route)`, used by the sidebar, global search and `adminGuard`;
+  - the `*ohPrivilege="'ROOMS_MANAGE'"` directive.
+- **When changes apply:**
+  - at the gateway, within the cache time;
+  - in the user's screens, at their next token refresh (at most 15 minutes).
+
+## Run locally (Windows PowerShell, from this folder)
+
+**Prerequisites:** JDK 21.
+
+**1. Secrets (once):** `Copy-Item .env.example .env`, then fill in `KC_BOOTSTRAP_ADMIN_PASSWORD`, `KEYCLOAK_SERVICE_CLIENT_SECRET` (any long random string), `SUPERADMIN_PASSWORD` (8+ chars, upper + lower case, digit, special) and `GATEWAY_INTERNAL_SECRET` (any long random string).
+
+**2. MongoDB (27017) and Keycloak (8080).** No Docker needed; binaries go to `%USERPROFILE%\onehostel-infra`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File infra\local\start-local.ps1                 # add -ResetKeycloak after editing the realm file
 ```
 
-The `dev` profile is active by default. The API listens on http://localhost:8080.
+With Docker instead: `docker compose --env-file .env -f infra/local/docker-compose.yml up -d`, then run `infra\local\keycloak\configure-token-exchange.ps1` once.
 
-| URL | Purpose |
-|---|---|
-| http://localhost:8080/actuator/health | `{"status":"UP"}` once MongoDB is reachable |
-| http://localhost:8080/swagger-ui.html | API docs (dev only) |
+**3. Services**, one terminal each (only the ones you need; the gateway and access-core for sign-in):
 
-## Test
+```powershell
+.\gradlew.bat bootRun-onehostel-gateway
+.\gradlew.bat bootRun-onehostel-access-core
+.\gradlew.bat bootRun-onehostel-property      # resident, billing likewise
+```
 
-```bash
-./gradlew test
+The Angular dev server proxies `/api` to the gateway on 9001. Sign in as `super.admin` with `SUPERADMIN_PASSWORD`.
+Under the `local` profile (the default) OTP codes are logged and returned as `devOtp`, and any 6-digit code is accepted from this machine.
+Health: `http://localhost:<port>/actuator/health`. API docs (local only): `http://localhost:<port>/swagger-ui.html`.
+
+Stop MongoDB and Keycloak with `infra\local\stop-local.ps1`.
+
+## Build and test
+
+```powershell
+.\gradlew.bat build              # every build, with tests
+.\gradlew.bat test               # tests only
+.\gradlew.bat publishLibraries   # tenancy, common, scheduler-core to mavenLocal (Nexus when NEXUS_URL is set)
+.\gradlew.bat bootJar            # service jars; then: docker build --build-arg SERVICE=onehostel-gateway .
 ```
 
 ## Environment variables
 
-Secrets are never committed. Set them in your shell or IDE run configuration.
-
-| Variable | Required | Dev default | Purpose |
-|---|---|---|---|
-| `SPRING_PROFILES_ACTIVE` | no | `dev` | `dev` or `prod` |
-| `MONGODB_URI` | prod | `mongodb://localhost:27017/onehostel` | MongoDB connection string, including database name |
-| `CORS_ALLOWED_ORIGINS` | prod | `http://localhost:4200` | Comma-separated browser origins allowed to call the API |
-| `SERVER_PORT` | no | `8080` | HTTP port |
-| `JWT_SECRET` | prod | public dev-only key | Base64 of ≥ 32 random bytes (`openssl rand -base64 48`) |
-| `JWT_EXPIRATION` | no | `15m` | Access token lifetime |
-| `JWT_REFRESH_EXPIRATION` | no | `7d` | Refresh token (cookie) lifetime |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | no | — | First super admin account, created at startup if missing |
-| `ADMIN_PASSCODE` | no | — | Optional 6-digit passcode for that super admin |
-| `AUTH_RATE_LIMIT_PER_MINUTE` | no | `10` | Requests per minute per client IP on the public auth endpoints |
-| `SEED_DEMO_USERS` | no | `true` (dev only) | Create the demo accounts below |
-
-## Login and roles
-
-All auth endpoints are under `/api/v1/auth` and take a `CommonRequestObject`:
-
-| Endpoint | `requestObject` |
-|---|---|
-| `POST /login` | `identifier`, `secret`, `authMode`, `userType` (see below) |
-| `POST /otp/send` | `identifier`, `channel` (`SMS` / `EMAIL`), `userType` (`HOSTEL_OWNER` / `HOSTEL_TENANT`) |
-| `POST /refresh-token` | none; uses the refresh cookie |
-| `POST /logout` | none; uses the refresh cookie |
-| `GET /me` | none; needs the access token |
-
-`/login` modes:
-
-| `userType` | `identifier` | `authMode` → `secret` |
+| Variable | Used by | Default (local) |
 |---|---|---|
-| `SUPER_ADMIN` | email or username | `PASSWORD` → password, `PASSCODE` → 6-digit passcode |
-| `HOSTEL_OWNER` | email or 10-digit mobile | `PASSWORD` → password, `OTP` → code from `/otp/send` |
-| `HOSTEL_TENANT` | email or 10-digit mobile | `PASSWORD` → password, `OTP` → code from `/otp/send` |
-
-```json
-{ "requestObject": { "identifier": "9848012345", "secret": "Owner@OneHostel2026", "authMode": "PASSWORD", "userType": "HOSTEL_OWNER" } }
-```
-
-Every login and refresh returns the same `responseObject`: `tokenType` (`Bearer`), `accessToken`, `expiresIn` (seconds), and `userProfile` (`userId`, `fullName`, `email`, `mobileNumber`, `role`, `status`, `organizationId`, `hostelId`, `roomNumber`, `bedId`, `permissions`).
-Send the access token as `Authorization: Bearer <accessToken>`.
-
-Account state is checked only after the credential is proven, so a wrong password never reveals it. Logging in requires `status` `ACTIVE` and not `locked`:
-
-- Locked accounts get `423 ACCOUNT_LOCKED`.
-- `PENDING_VERIFICATION` accounts get `403 ACCOUNT_NOT_VERIFIED`.
-- `INACTIVE` and `BLOCKED` accounts get `403 ACCOUNT_DISABLED`.
-
-Sessions:
-
-- **Access token:** a JWT that lasts 15 minutes.
-- **Refresh token:** set only as the `oh_refresh` cookie (HttpOnly, Secure, SameSite=Strict, path `/api/v1/auth`), so JavaScript never sees it. Angular must send `withCredentials: true` on `/refresh-token` and `/logout`.
-- **Rotation:** each refresh replaces the cookie. Presenting an already-used refresh token ends the whole session.
-
-Limits:
-
-- **Rate limit:** the public auth endpoints allow 10 requests per minute per client IP, then answer `429` with a `Retry-After` header. The count is kept in memory, so it is per server instance. Behind a reverse proxy, set `server.forward-headers-strategy=native` so the client's IP is used.
-- **OTP:** a code is valid for 5 minutes and allows 5 tries. Each identifier gets at most 3 codes per 15 minutes. `/otp/send` gives the same answer whether or not the account exists.
-- **OTP delivery:** in `dev`, codes are written to the server log. Production must provide an `OtpSender` bean (SMS / email), or the app will not start.
-
-| Role | Path prefix it alone can call |
-|---|---|
-| `SUPER_ADMIN` | `/api/v1/admin/**` |
-| `HOSTEL_OWNER` | `/api/v1/owner/**` |
-| `HOSTEL_TENANT` | `/api/v1/tenant/**` |
-
-Every other `/api/v1/**` path accepts any signed-in role. Use `@PreAuthorize` on controller methods for finer rules.
-
-In the `dev` profile, these accounts are created at startup if missing. The values are dev-only and publicly known:
-
-| Name | Role | Email | Password | Also logs in with |
-|---|---|---|---|---|
-| OneHostel Super Admin | `SUPER_ADMIN` | `admin@onehostel.com` | `Admin@OneHostel2026` | username `superadmin`, passcode `246810` |
-| Rajesh Kumar | `HOSTEL_OWNER` | `rajesh.kumar@onehostel.com` | `Owner@OneHostel2026` | mobile `9848012345` (password or OTP) |
-| Priya Sharma | `HOSTEL_TENANT` | `priya.sharma@onehostel.com` | `Tenant@OneHostel2026` | mobile `9701234567` (password or OTP) |
-
-The super admin comes from `app.bootstrap.admin-*` in `application-dev.yml`; override it with `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` and `ADMIN_PASSCODE`.
-The owner and tenant come from UserSeeder (`SEED_DEMO_USERS=false` skips them). They belong to organization `org-sunrise-hostels`, and the tenant is in room `101`, bed `ROOM-101-BED-A`.
-At startup, UserMigration brings stored users up to date: old role names, the old `active` flag → `status`, and `hostelBranchId` / `unitId` → `hostelId` / `bedId`. It then rebuilds their search-mirror rows.
-
-### Search mirror
-
-`HostelCommonSearch` (collection `C0009`) holds one indexed row per user for fast list and lookup screens, kept in sync on every save and delete of a user:
-
-| Slot | Holds |
-|---|---|
-| `text1` | user id |
-| `text2` | role |
-| `text3` | status |
-| `text4` | locked |
-| `text5` | email |
-| `text6` | username |
-| `text8` | country code |
-| `text9` | mobile |
-| `text10` | full name |
-| `text11` | hostel id |
-| `text12` | bed id |
-| `text13` | room number |
-| `list1` | permissions |
-
-Password and passcode hashes are never mirrored.
-
-## Feature modules and tenancy
-
-Every entity exposes the same five actions, all `POST` with a `CommonRequestObject` body:
-
-| Action | `requestObject` | Returns |
-|---|---|---|
-| `{base}/create` | the entity's DTO | 201, the created record |
-| `{base}/update` | the DTO with `id` (and `version` to detect concurrent edits) | the updated record |
-| `{base}/inq` | `{ "id": "..." }` | one record |
-| `{base}/getall` | `{ "keyword": "...", "hostelBranchId": "..." }` or `{}`; paging in the envelope | a page: `content`, `page`, `size`, `totalElements`, `totalPages` |
-| `{base}/delete` | `{ "id": "..." }` | no `responseObject` |
-
-The first module is hostels, at `/api/v1/hostels`.
-
-Tenancy comes only from the login token's `org` claim, never from headers or the body:
-
-- `SUPER_ADMIN` sees every organization, and must send `organizationId` when creating.
-- `HOSTEL_OWNER` reads and writes only their own organization.
-- `HOSTEL_TENANT` only reads their own organization.
-
-A record in another organization answers `404 ENTITY_NOT_FOUND`, the same as a missing one.
-
-To add a module, extend `HostelAbstractDocument` (the document), `HostelAbstractService` (the mapping methods) and `HostelCoreController` (a constructor and a `@RequestMapping`).
-
-## Package layout
-
-```
-com.onehostel
-├── config       AppProperties (app.*), CORS, OpenAPI
-├── controller   REST endpoints (thin — delegate to services); helper/ HostelCoreController (shared base)
-├── constants    Collection names, routes/headers, defaults, shared enums (Role, Status, ...)
-├── dto          Feature request/response records; helper/ envelopes, paging, shared DTOs
-├── exception    ErrorCode (code + HTTP status + message), OneHostelException, GlobalExceptionHandler
-├── filter       CorrelationIdFilter (X-Correlation-Id → logs + response header)
-├── model        MongoDB documents; helper/ HostelAbstractDocument (shared base)
-├── repository   Spring Data repositories
-├── security     SecurityConfig, JWT, 401/403 handlers
-└── service      Business logic; helper/ HostelAbstractInterface, HostelAbstractService
-```
+| `SPRING_PROFILES_ACTIVE` | all | `local` |
+| `GATEWAY_INTERNAL_SECRET` | all | none: required outside `local` |
+| `KEYCLOAK_SERVICE_CLIENT_SECRET` | access-core | none: required |
+| `KEYCLOAK_SERVER_URL`, `KEYCLOAK_REALM` | access-core | `http://localhost:8080`, `onehostel` |
+| `KEYCLOAK_ISSUER_URI`, `KEYCLOAK_JWK_SET_URI` | gateway | the local realm |
+| `ACCESS_MONGODB_URI`, `RESIDENT_MONGODB_URI`, `PROPERTY_MONGODB_URI`, `BILLING_MONGODB_URI` | each service | `mongodb://localhost:27017/onehostel_<service>` |
+| `ACCESS_CORE_URI`, `RESIDENT_URI`, `PROPERTY_URI`, `BILLING_URI` | gateway | `http://localhost:900x` |
+| `CORS_ALLOWED_ORIGINS` | gateway | `http://localhost:4200` |
+| `AUTH_RATE_LIMIT_PER_MINUTE` | gateway | `10` per client IP on login / OTP / refresh |
+| `PRIVILEGE_CACHE_TTL` | gateway | `60s`: how long the privilege matrix is reused |
+| `OTP_DEV_MODE`, `OTP_ACCEPT_ANY` | access-core | `true` under `local`; refused elsewhere |
 
 ## API conventions
 
-Request body (`POST`/`PUT`/`PATCH`) is a `CommonRequestObject`. Only `requestObject` is required:
+Requests are a `CommonRequestObject`; controllers bind the inner `requestObject` directly:
 
 ```json
-{
-  "requestObject": { },
-  "requestId": "client-generated-id",
-  "clientSource": "WEB",
-  "appVersion": "1.4.0",
-  "locale": "en-IN",
-  "requestedAt": "2026-10-13T10:00:00Z",
-  "page": 0, "size": 10, "sortField": "createdDateTime", "sortOrder": "DESC", "paginationRequired": true
-}
+{ "requestObject": { }, "clientSource": "WEB", "page": 0, "size": 20, "sortField": "createdAt", "sortOrder": "DESC",
+  "issuanceSearch": { "andOrType": "AND", "filterQueryVO": [ { "filterfield": "status", "filtervalue": "ACTIVE", "operatorType": "EQUAL" } ] } }
 ```
 
-Every response, success or error, is a `CommonResponseObject`. The HTTP status always equals `statusCode`.
+Success: `{ "success": true, "message", "responseObject", "statusCode", "correlationId", "timestamp" }`.
+Error: `{ "success": false, "errorCode", "message", "statusCode", "errors": [{ "field", "message" }], "correlationId", "sourceService", "timestamp" }`.
+The HTTP status always equals `statusCode`. Every response carries `X-Correlation-Id`, and every log line of that request shows it.
 
-```json
-{
-  "success": true,
-  "message": "Login successful.",
-  "responseObject": { },
-  "statusCode": 200,
-  "correlationId": "4edce2f011704bb4909db0aba6266758",
-  "timestamp": "2026-10-13T10:00:00Z"
-}
-```
-
-```json
-{
-  "success": false,
-  "message": "Request validation failed.",
-  "statusCode": 400,
-  "errorCode": "VALIDATION_FAILED",
-  "errors": [{ "field": "requestObject.email", "message": "must be a well-formed email address" }],
-  "correlationId": "4edce2f011704bb4909db0aba6266758",
-  "timestamp": "2026-10-13T10:00:00Z"
-}
-```
-
-Every response carries an `X-Correlation-Id` header. Every log line for that request shows the same id.
+Generic CRUD (any feature on `AbstractCrudController`): `GET /inq/{id}`, `POST /getall`, `POST /create`, `PUT /update/{id}`, `PATCH /patch/{id}`, `DELETE /delete/{id}` (soft delete).

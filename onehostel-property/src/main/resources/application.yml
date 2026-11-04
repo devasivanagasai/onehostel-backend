@@ -1,0 +1,45 @@
+server:
+  port: ${SERVER_PORT:9005}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+spring:
+  application:
+    name: onehostel-property
+  profiles:
+    # Local development unless SPRING_PROFILES_ACTIVE says otherwise (set it from the deployment, never the image)
+    default: local
+  config:
+    # Secrets come from the environment or the git-ignored .env in the repo root (see .env.example)
+    import: "optional:file:.env[.properties],optional:file:../.env[.properties]"
+  data:
+    mongodb:
+      # Each service owns its database
+      uri: ${PROPERTY_MONGODB_URI:mongodb://localhost:27017/onehostel_property}
+      auto-index-creation: true
+
+app:
+  internal:
+    # Must equal the gateway's; required outside the local profile
+    secret: ${GATEWAY_INTERNAL_SECRET:}
+  tenancy:
+    mode: ENFORCE
+
+springdoc:
+  api-docs:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  pattern:
+    level: "%5p [%X{correlationId:-}] [%X{tenantId:-}]"
