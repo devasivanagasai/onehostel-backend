@@ -1,0 +1,29 @@
+# The single place for versions. Every included build reads this file through its settings.gradle.kts.
+# Spring-managed libraries (Lombok, Caffeine, Testcontainers, ...) take their version from the Boot BOM;
+# CVE fixes go through Boot BOM properties (extra["tomcat.version"] = "..."), never forced versions.
+[versions]
+spring-boot = "3.5.16"
+spring-dependency-management = "1.1.7"
+spring-cloud = "2025.0.3"
+sonarqube = "7.5.0.8588"
+ulid-creator = "5.2.4"
+springdoc = "2.8.17"
+bucket4j = "8.22.0"
+archunit = "1.5.1"
+
+[libraries]
+# Gradle plugins, as dependencies of build-logic
+spring-boot-gradle-plugin = { module = "org.springframework.boot:spring-boot-gradle-plugin", version.ref = "spring-boot" }
+spring-dependency-management-plugin = { module = "io.spring.gradle:dependency-management-plugin", version.ref = "spring-dependency-management" }
+sonarqube-gradle-plugin = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version.ref = "sonarqube" }
+
+# OneHostel libraries (substituted by the composite build; published to Nexus / mavenLocal otherwise)
+onehostel-tenancy = { module = "com.onehostel:onehostel-tenancy", version = "0.0.1-SNAPSHOT" }
+onehostel-common = { module = "com.onehostel:onehostel-common", version = "0.0.1-SNAPSHOT" }
+onehostel-scheduler-core = { module = "com.onehostel:onehostel-scheduler-core", version = "0.0.1-SNAPSHOT" }
+
+spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
+ulid-creator = { module = "com.github.f4b6a3:ulid-creator", version.ref = "ulid-creator" }
+springdoc-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+bucket4j-core = { module = "com.bucket4j:bucket4j_jdk17-core", version.ref = "bucket4j" }
+archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }

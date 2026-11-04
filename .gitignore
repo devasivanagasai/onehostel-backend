@@ -3,6 +3,16 @@
 .env.*
 !.env.example
 
+*.jks
+*.p12
+*.keystore
+*service-account*.json
+
+# Logs and crash dumps
+*.log
+hs_err_pid*
+*.hprof
+
 # Gradle
 .gradle/
 build/

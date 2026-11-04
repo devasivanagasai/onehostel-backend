@@ -20,7 +20,7 @@
   "clients": [
     {
       "clientId": "oh-auth-gtwy-service",
-      "name": "oh-auth-gtwy service account (registration, OTP token exchange)",
+      "name": "access-core service account (OTP token exchange, password reset)",
       "enabled": true,
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
@@ -58,12 +58,26 @@
             "id.token.claim": "true",
             "userinfo.token.claim": "true"
           }
+        },
+        {
+          "name": "user-id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "user_id",
+            "claim.name": "user_id",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
         }
       ]
     },
     {
       "clientId": "onehostel-backend",
-      "name": "OneHostel backend (oh-auth-gtwy)",
+      "name": "OneHostel backend (password login via access-core)",
       "enabled": true,
       "publicClient": true,
       "directAccessGrantsEnabled": true,
@@ -102,6 +116,20 @@
             "id.token.claim": "true",
             "userinfo.token.claim": "true"
           }
+        },
+        {
+          "name": "user-id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "user_id",
+            "claim.name": "user_id",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
         }
       ]
     }
@@ -126,7 +154,8 @@
       "credentials": [
         { "type": "password", "value": "${SUPERADMIN_PASSWORD}", "temporary": false }
       ],
-      "realmRoles": ["SUPER_ADMIN"]
+      "realmRoles": ["SUPER_ADMIN"],
+      "attributes": { "user_id": ["00000000000000000000000001"] }
     }
   ],
   "components": {

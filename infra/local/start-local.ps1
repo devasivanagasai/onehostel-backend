@@ -1,4 +1,4 @@
-# Starts MongoDB (27017) and Keycloak (8080) for oh-auth-gtwy without Docker or admin rights.
+# Starts MongoDB (27017) and Keycloak (8080) for the OneHostel services without Docker or admin rights.
 # Binaries live outside the repo in $InfraDir; they are downloaded and unpacked on first run.
 #   powershell -ExecutionPolicy Bypass -File infra\local\start-local.ps1
 # Add -ResetKeycloak to wipe Keycloak's data and re-import keycloak\onehostel-realm.json
@@ -120,7 +120,7 @@ Wait-Until {
 
 Write-Host ''
 Write-Host 'Ready:'
-Write-Host '  MongoDB   mongodb://localhost:27017/onehostel_db'
+Write-Host '  MongoDB   mongodb://localhost:27017 (one database per service: onehostel_access, onehostel_property, ...)'
 Write-Host "  Keycloak  http://localhost:8080  (admin console user: $env:KC_BOOTSTRAP_ADMIN_USERNAME, password in .env)"
 Write-Host '  Login     super.admin (password = SUPERADMIN_PASSWORD in .env; only seeded account)'
 Write-Host "  Logs      $InfraDir\logs"

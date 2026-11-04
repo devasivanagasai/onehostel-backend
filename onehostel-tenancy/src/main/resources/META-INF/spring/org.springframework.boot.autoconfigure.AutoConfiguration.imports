@@ -1,0 +1,2 @@
+com.onehostel.tenancy.config.TenancyMongoAutoConfiguration
+com.onehostel.tenancy.config.TenancyWebAutoConfiguration

@@ -1,0 +1,8 @@
+# Local development (the default profile).
+springdoc:
+  api-docs:
+    enabled: true
+
+logging:
+  level:
+    com.onehostel: DEBUG

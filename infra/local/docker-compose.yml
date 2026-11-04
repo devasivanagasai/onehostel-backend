@@ -1,4 +1,4 @@
-# Local dependencies for oh-auth-gtwy (for machines with Docker).
+# Local dependencies of the OneHostel services (for machines with Docker).
 # Without Docker, use start-local.ps1 in this folder instead.
 # Secrets come from the repo-root .env (copy .env.example). From the repo root:
 #   docker compose --env-file .env -f infra/local/docker-compose.yml up -d
@@ -9,7 +9,7 @@ services:
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_DATABASE: onehostel_db
+      MONGO_INITDB_DATABASE: onehostel_access
     volumes:
       - mongo-data:/data/db
       - ./mongo/seed-users.js:/docker-entrypoint-initdb.d/seed-users.js:ro

@@ -1,5 +1,5 @@
-# Grants the oh-auth-gtwy-service client permission to issue tokens on behalf of users
-# (used by /api/v1/auth/otp/verify after the gateway has checked the code). Keycloak must run
+# Grants the oh-auth-gtwy-service client (used by onehostel-access-core) permission to issue tokens on behalf of users
+# (used by /api/v1/auth/otp/verify after access-core has checked the code). Keycloak must run
 # with --features=token-exchange,admin-fine-grained-authz. Safe to run repeatedly.
 param(
     [string]$KeycloakUrl = 'http://localhost:8080',
